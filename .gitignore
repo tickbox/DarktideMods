@@ -1,0 +1,10 @@
+*
+!.gitignore
+!/README.md
+!CustomLoadingBackground
+!CustomLoadingBackground/**
+!IMGONNAPUKE
+!IMGONNAPUKE/**
+
+*/*.*
+!/*/*.mod
