@@ -17,8 +17,15 @@ return {
 				setting_id		= "loadWeb",
 				title			= "Internet",
 				type			= "checkbox",
-				default_value	= true,
+				default_value	= false,
 				tooltip			= "Load images hosted on the internet using URLs saved in the CustomLoadingBackground\\urls.txt file"
+			},
+			{
+				setting_id		= "loadCurated",
+				title			= "Curated",
+				type			= "checkbox",
+				default_value	= true,
+				tooltip			= "Load images hosted on the internet using a web-based text file"
 			},
 		}
 	}
