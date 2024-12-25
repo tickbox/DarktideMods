@@ -3,6 +3,10 @@ local mod = get_mod("CustomLoadingBackground")
 local localServer = get_mod("DarktideLocalServer")
 local backgroundImageTableLocal = mod:persistent_table("backgroundImageTableLocal", {})
 local backgroundImageTableWeb = mod:persistent_table("backgroundImageTableWeb", {})
+local backgroundImageTableCurated = mod:persistent_table("backgroundImageTableCurated", {})
+local backgroundImageTableAll = mod:persistent_table("backgroundImageTableAll", {})
+local waitTime = 2 --too many requests to the local server seem to make it stop serving images
+local lastTime = os.time()
 local urls = mod:io_read_content_to_table("CustomLoadingBackground/scripts/mods/CustomLoadingBackground/urls", "txt")
 
 local checkDependencies = function()
@@ -20,7 +24,13 @@ local loadLocalImages = function ()
 	if localServer then
 		localServer.load_directory_textures("scripts/mods/CustomLoadingBackground/Images")
 			:next(function(backgroundImageFiles)
-				table.merge(backgroundImageTableLocal, backgroundImageFiles)
+				for k, v in pairs(backgroundImageFiles) do
+					if table.size(v) == 4 and not backgroundImageTableLocal[k] then
+						backgroundImageTableLocal[k] = v
+					else
+						Managers.url_loader:unload_texture(v.url)
+					end
+				end
 			end)
 			:catch(function(error)
 				mod:dtf(error,"Error loading images",99)
@@ -69,21 +79,21 @@ end
 
 mod.on_all_mods_loaded = function ()
 	checkDependencies() 
-	loadAllImages() --not really needed unless you manually reload mods
 end
 
-mod.on_game_state_changed = function(status, state)
+mod.update = function()
+	if lastTime + waitTime < os.time() then
 	if table.is_empty(backgroundImageTableLocal) and mod:get("loadLocal") then
 		loadLocalImages()
 	end
-	--need to add a check for all images loaded
 	if table.is_empty(backgroundImageTableWeb) and mod:get("loadWeb") then
 		loadWebImages()
+		end
+		lastTime = os.time()
 	end
 end
 
 mod.on_setting_changed = function(setting_id)
-	--mod:echo("Setting changed: " .. setting_id .. " to " .. tostring(mod:get(setting_id)))
 	if setting_id == "loadLocal" and mod:get("loadLocal") then
 		loadLocalImages()
 	elseif setting_id == "loadLocal" and not mod:get("loadLocal") then
@@ -155,7 +165,7 @@ Use /bglist to see the list of images and their index.
 
 ]] 
 mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(p)
-	img = tonumber(p)
+	local img = tonumber(p)
 	if img and (not mod.showBG or (mod.showBG and img)) then
 		local allBackgroundImages = {}
 		table.merge(allBackgroundImages, backgroundImageTableLocal)
@@ -164,7 +174,7 @@ mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(
 			local imgKey = table.keys(allBackgroundImages)[img]
 			mod.showBG = true
 			mod.BGTexture = allBackgroundImages[imgKey].texture
-		else
+		else --is this still needed?
 			mod.showBG = true
 			loadAllImages()
 		end
