@@ -18,7 +18,7 @@ local checkDependencies = function()
 	if not localServer and mod:get("loadLocal") then
 		mod:set("loadLocal", false)
 		mod:echo('The mod "Darktide Local Server" is required to load images from the local folder. Disabling local image loading.')
-		if not mod:get("loadWeb") then
+		if not mod:get("loadWeb") or not mod:get("loadCurated") then
 			mod:disable_all_hooks()
 			mod:disable_all_commands()
 		end
