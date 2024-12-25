@@ -60,12 +60,14 @@ local loadWebImages = function ()
 end
 
 local loadAllImages = function()
-	if (mod:get("loadLocal")) then
+	if table.is_empty(backgroundImageTableLocal) and (mod:get("loadLocal")) then
 		loadLocalImages()
 	end
-	if (mod:get("loadWeb")) then
+	if table.is_empty(backgroundImageTableWeb) and (mod:get("loadWeb")) then
 		loadWebImages()
 	end
+	table.add_missing_recursive(backgroundImageTableAll, backgroundImageTableLocal)
+	table.add_missing_recursive(backgroundImageTableAll, backgroundImageTableWeb)
 end
 
 local getRandomImage = function()
@@ -83,12 +85,7 @@ end
 
 mod.update = function()
 	if lastTime + waitTime < os.time() then
-	if table.is_empty(backgroundImageTableLocal) and mod:get("loadLocal") then
-		loadLocalImages()
-	end
-	if table.is_empty(backgroundImageTableWeb) and mod:get("loadWeb") then
-		loadWebImages()
-		end
+		loadAllImages()
 		lastTime = os.time()
 	end
 end
@@ -145,11 +142,8 @@ mod:hook("UIHud", "init", function(func, self, elements, visibility_groups, para
 end)
 
 mod:command("bglist", "List all available backgrounds", function()
-	local allBackgroundImages = {}
-	table.merge(allBackgroundImages, backgroundImageTableLocal)
-	table.merge(allBackgroundImages, backgroundImageTableWeb)
-	if not table.is_empty(allBackgroundImages) then
-		for k,v in pairs(table.keys(allBackgroundImages)) do
+	if not table.is_empty(backgroundImageTableAll) then
+		for k,v in pairs(table.keys(backgroundImageTableAll)) do
 			mod:echo(k .. ": " .. v)
 		end
 	else
@@ -166,14 +160,11 @@ Use /bglist to see the list of images and their index.
 ]] 
 mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(p)
 	local img = tonumber(p)
-	if img and (not mod.showBG or (mod.showBG and img)) then
-		local allBackgroundImages = {}
-		table.merge(allBackgroundImages, backgroundImageTableLocal)
-		table.merge(allBackgroundImages, backgroundImageTableWeb)
-		if not table.is_empty(allBackgroundImages) and img <= table.size(allBackgroundImages) then
-			local imgKey = table.keys(allBackgroundImages)[img]
+	if img and (not mod.showBG or (mod.showBG and img)) and img > 0 then
+		if not table.is_empty(backgroundImageTableAll) and img <= table.size(backgroundImageTableAll) then
+			local imgKey = table.keys(backgroundImageTableAll)[img]
 			mod.showBG = true
-			mod.BGTexture = allBackgroundImages[imgKey].texture
+			mod.BGTexture = backgroundImageTableAll[imgKey].texture
 		else --is this still needed?
 			mod.showBG = true
 			loadAllImages()
