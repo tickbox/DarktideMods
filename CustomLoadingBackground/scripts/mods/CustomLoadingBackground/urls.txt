@@ -1,6 +1,1 @@
 --put the url for each image on its own line
-https://i.imgur.com/O9D87yL.png
-https://i.imgur.com/zWaw1oQ.png
-https://i.imgur.com/haRslmQ.png
-https://i.imgur.com/3qbLTBY.png
-https://i.imgur.com/t5NeUme.png
