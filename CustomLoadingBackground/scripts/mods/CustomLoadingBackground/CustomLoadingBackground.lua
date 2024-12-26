@@ -141,9 +141,8 @@ mod.on_all_mods_loaded = function ()
 	checkDependencies() 
 end
 
---will probably change this to hook after the backend has been initialized if it can load consistently
 mod.update = function()
-	if lastTime + waitTime < os.time() then
+	if lastTime + waitTime < os.time() and Managers.backend._initialized then
 		loadAllImages()
 		lastTime = os.time()
 	end
