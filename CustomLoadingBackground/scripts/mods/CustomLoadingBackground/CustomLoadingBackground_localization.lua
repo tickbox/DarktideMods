@@ -1,5 +1,9 @@
 return {
 	mod_description = {
-		en = "Custom Loading Background description",
+	toggleSlideShow = {
+		en = "Toggle slideshow",
+	},
+	slideshowInterval = {
+		en = "Slideshow image interval",
 	},
 }

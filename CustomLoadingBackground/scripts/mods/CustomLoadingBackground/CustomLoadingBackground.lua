@@ -8,6 +8,8 @@ local backgroundImageTableCuratedUrls = mod:persistent_table("backgroundImageTab
 local backgroundImageTableAll = mod:persistent_table("backgroundImageTableAll", {})
 local waitTime = 2 --too many requests to the local server seem to make it stop serving images
 local lastTime = os.time()
+local waitTimeSlideshow = mod:get("slideshowInterval")
+local lastTimeSlideshow = os.time()
 local urls = mod:io_read_content_to_table("CustomLoadingBackground/scripts/mods/CustomLoadingBackground/urls", "txt")
 local curatedLists = {}
 
@@ -146,6 +148,10 @@ mod.update = function()
 		loadAllImages()
 		lastTime = os.time()
 	end
+	if lastTimeSlideshow + waitTimeSlideshow < os.time() and mod.slideshow then
+		mod.cycleImageSlideshow()
+		lastTimeSlideshow = os.time()
+	end
 end
 
 mod.on_setting_changed = function(setting_id)
@@ -177,6 +183,8 @@ mod.on_setting_changed = function(setting_id)
 		for k, v in pairs(backgroundImageTableCuratedUrls) do
 			backgroundImageTableCuratedUrls[k] = { loaded = false }
 		end
+	elseif setting_id == "slideshowInterval" then
+		waitTimeSlideshow = mod:get("slideshowInterval")
 	end
 end
 
@@ -197,6 +205,7 @@ mod:hook_safe("LoadingView", "on_enter", function(self)
 end)
 
 mod.showBG = false
+mod.slideshow = false
 mod:add_require_path("CustomLoadingBackground/scripts/mods/CustomLoadingBackground/Modules/BackgroundElement")
 
 mod:hook("UIHud", "init", function(func, self, elements, visibility_groups, params)
@@ -249,3 +258,63 @@ mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(
  mod:command("bgfolder", "Show the location of the folder where images are stored", function()
 	mod:echo(localServer:get_root_mods_path():gsub('"', '') .. "\\CustomLoadingBackground\\scripts\\mods\\CustomLoadingBackground\\Images")
  end)
+
+ mod:command("bgss", "Start a slideshow of all images (usage: /bgss to open and close)", function()
+	mod.toggleSlideShow()
+ end)
+
+local getNextImage = function(n)
+	local imageKeys = {}
+	imageKeys = table.keys(backgroundImageTableAll)
+	local currentIndex = table.find(imageKeys, mod.imgKey)
+	local nextIndex = currentIndex + n
+	if nextIndex > #imageKeys then
+		nextIndex = 1
+	elseif nextIndex < 1 then
+		nextIndex = #imageKeys
+	end
+	return imageKeys[nextIndex]
+end
+
+function mod.toggleSlideShow()
+	if not mod.showBG and not mod.slideshow then
+		local randomImage = getRandomImage()
+		if not randomImage then
+			return
+		end
+		mod.showBG = true
+		mod.slideshow = true
+		lastTimeSlideshow = os.time()
+		mod.BGTexture = randomImage.texture
+	elseif mod.showBG and not mod.slideshow then
+		mod.slideshow = true
+		mod.cycleImageSlideshow()
+		lastTimeSlideshow = os.time()
+	else
+		mod.showBG = false
+		mod.slideshow = false
+	end
+end
+
+function mod.cycleImageSlideshow()
+	if mod.imgKey and mod.showBG and mod.slideshow then
+		local imgCount = table.size(backgroundImageTableAll)
+		mod.imgKey = getNextImage(math.random(1, imgCount))
+		mod.BGTexture = backgroundImageTableAll[mod.imgKey].texture
+	end
+end
+
+function mod.cycleImageNext()
+	if mod.imgKey and mod.showBG then
+		mod.imgKey = getNextImage(1)
+		mod.BGTexture = backgroundImageTableAll[mod.imgKey].texture
+	end
+
+end
+
+function mod.cycleImagePrev()
+	if mod.imgKey and mod.showBG then
+		mod.imgKey = getNextImage(-1)
+		mod.BGTexture = backgroundImageTableAll[mod.imgKey].texture
+	end
+end

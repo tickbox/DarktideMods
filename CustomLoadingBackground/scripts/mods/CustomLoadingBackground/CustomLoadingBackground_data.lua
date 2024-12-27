@@ -25,7 +25,27 @@ return {
 				title			= "Curated",
 				type			= "checkbox",
 				default_value	= true,
-				tooltip			= "Load images hosted on the internet using a web-based text file"
+			{
+				setting_id	= "groupSlideShow",
+				type		= "group",
+				sub_widgets = {
+					{
+						setting_id		= "slideshowInterval",
+						type			= "numeric",
+						default_value	= 6,
+						range			= { 1, 60 },
+						decimals_number	= 0,
+						tooltip			= "slideshowInterval"
+					},
+					{
+						setting_id		= "toggleSlideShow",
+						type			= "keybind",
+						default_value	= {},
+						keybind_trigger	= "pressed",
+						keybind_type	= "function_call",
+						function_name	= "toggleSlideShow",
+					},
+				}
 			},
 		}
 	}
