@@ -1,30 +1,29 @@
 local mod = get_mod("CustomLoadingBackground")
 
 return {
-	name = "CustomLoadingBackground",
-	description = mod:localize("Toggle where to look for images to load"),
+	name = mod:localize("mod_name"),
+	description = mod:localize("mod_description"),
 	is_togglable = true,
 	options = {
 		widgets = {
 			{
 				setting_id		= "loadLocal",
-				title			= "Local Image Folder",
 				type			= "checkbox",
 				default_value	= false,
-				tooltip			= "Load images from the CustomLoadingBackground\\Images folder"
+						tooltip			= "loadLocalTooltip"
 			},
 			{
 				setting_id		= "loadWeb",
-				title			= "Internet",
 				type			= "checkbox",
 				default_value	= false,
-				tooltip			= "Load images hosted on the internet using URLs saved in the CustomLoadingBackground\\urls.txt file"
+						tooltip			= "loadWebTooltip"
 			},
 			{
 				setting_id		= "loadCurated",
 				title			= "Curated",
 				type			= "checkbox",
 				default_value	= true,
+						tooltip			= "loadCuratedTooltip"
 			{
 				setting_id	= "groupSlideShow",
 				type		= "group",
