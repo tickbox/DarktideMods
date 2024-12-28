@@ -15,6 +15,7 @@ local curatedLists = {}
 
 --copy and paste the table.append line below, replacing the url with any lists you want to add
 table.append(curatedLists, {"https://raw.githubusercontent.com/tickbox/DarktideMods/main/CustomLoadingBackground/scripts/mods/CustomLoadingBackground/curatedurls.txt"})
+table.append(curatedLists, {"https://raw.githubusercontent.com/Backup158/DarktideCustomLoadingBackgroundsList/refs/heads/main/urls.txt"})
 
 local checkDependencies = function()
 	if not localServer and mod:get("loadLocal") then
@@ -136,7 +137,8 @@ end
 local getRandomImage = function()
 	local imageKeys = {}
 	imageKeys = table.keys(backgroundImageTableAll)
-	return backgroundImageTableAll[imageKeys[math.random(#imageKeys)]]
+	mod.imgKey = imageKeys[math.random(1, #imageKeys)]
+	return backgroundImageTableAll[mod.imgKey]
 end
 
 mod.on_all_mods_loaded = function ()
@@ -163,6 +165,7 @@ mod.on_setting_changed = function(setting_id)
 			backgroundImageTableLocal[k] = nil
 			backgroundImageTableAll[k] = nil
 		end
+	--should probably add a check to not unload images that are in both web and curated lists
 	elseif setting_id == "loadWeb" and mod:get("loadWeb") then
 		loadWebImages()
 	elseif setting_id == "loadWeb" and not mod:get("loadWeb") then
@@ -189,6 +192,7 @@ mod.on_setting_changed = function(setting_id)
 end
 
 mod:hook_safe("LoadingView", "on_enter", function(self)
+	mod.showBG = true
 	local randomImage = getRandomImage()
 	if not randomImage then
 		return
@@ -202,6 +206,26 @@ mod:hook_safe("LoadingView", "on_enter", function(self)
     end
 
 	backgroundStyle.material_values.texture_map = randomImage.texture
+end)
+
+mod:hook_safe("LoadingView", "update", function(self)
+	if not mod.imgKey then
+		return
+	end
+
+	local backgroundWidget = self._widgets_by_name.background
+	local backgroundStyle = backgroundWidget.style.style_id_1
+
+	if not backgroundStyle.material_values then
+        backgroundStyle.material_values = {}
+    end
+
+	backgroundStyle.material_values.texture_map = backgroundImageTableAll[mod.imgKey].texture
+end)
+
+mod:hook_safe("LoadingView", "on_exit", function(self)
+	mod.showBG = false
+	mod.slideshow = false
 end)
 
 mod.showBG = false
@@ -242,9 +266,9 @@ mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(
 	local img = tonumber(p)
 	if img and (not mod.showBG or (mod.showBG and img)) and img > 0 then
 		if not table.is_empty(backgroundImageTableAll) and img <= table.size(backgroundImageTableAll) then
-			local imgKey = table.keys(backgroundImageTableAll)[img]
+			mod.imgKey = table.keys(backgroundImageTableAll)[img]
 			mod.showBG = true
-			mod.BGTexture = backgroundImageTableAll[imgKey].texture
+			mod.BGTexture = backgroundImageTableAll[mod.imgKey].texture
 		else --is this still needed?
 			mod.showBG = true
 			loadAllImages()
@@ -308,13 +332,14 @@ function mod.cycleImageNext()
 	if mod.imgKey and mod.showBG then
 		mod.imgKey = getNextImage(1)
 		mod.BGTexture = backgroundImageTableAll[mod.imgKey].texture
+		lastTimeSlideshow = os.time()
 	end
-
 end
 
 function mod.cycleImagePrev()
 	if mod.imgKey and mod.showBG then
 		mod.imgKey = getNextImage(-1)
 		mod.BGTexture = backgroundImageTableAll[mod.imgKey].texture
+		lastTimeSlideshow = os.time()
 	end
 end
