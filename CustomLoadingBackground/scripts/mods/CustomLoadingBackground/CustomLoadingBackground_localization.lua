@@ -39,6 +39,12 @@ return {
 	cycleImagePrev = {
 		en = "Cycle to the previous image",
 	},
+	cycleImageLoading = {
+		en = "Cycle images while loading"
+	},
+	cycleImageLoadingInterval = {
+		en = "Cycle loading image interval",
+	},
 	toggleSlideShow = {
 		en = "Toggle slideshow",
 	},

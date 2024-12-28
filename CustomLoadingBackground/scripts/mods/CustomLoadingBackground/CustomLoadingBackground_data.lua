@@ -35,6 +35,20 @@ return {
 				type		= "group",
 				sub_widgets = {
 					{
+						setting_id		= "cycleImageLoading",
+						type			= "checkbox",
+						default_value	= true,
+						tooltip			= "cycleImageLoading"
+					},
+					{
+						setting_id		= "cycleImageLoadingInterval",
+						type			= "numeric",
+						default_value	= 4,
+						range			= { 1, 60 },
+						decimals_number	= 0,
+						tooltip			= "cycleImageLoadingInterval"
+					},
+					{
 						setting_id		= "cycleImageNext",
 						type			= "keybind",
 						default_value	= {},

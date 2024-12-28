@@ -8,8 +8,11 @@ local backgroundImageTableCuratedUrls = mod:persistent_table("backgroundImageTab
 local backgroundImageTableAll = mod:persistent_table("backgroundImageTableAll", {})
 local waitTime = 2 --too many requests to the local server seem to make it stop serving images
 local lastTime = os.time()
+local waitTimeLoading = mod:get("cycleImageLoadingInterval")
 local waitTimeSlideshow = mod:get("slideshowInterval")
 local lastTimeSlideshow = os.time()
+mod.cycleImageLoading = mod:get("cycleImageLoading")
+local loadingView = false
 local urls = mod:io_read_content_to_table("CustomLoadingBackground/scripts/mods/CustomLoadingBackground/urls", "txt")
 local curatedLists = {}
 
@@ -150,7 +153,7 @@ mod.update = function()
 		loadAllImages()
 		lastTime = os.time()
 	end
-	if lastTimeSlideshow + waitTimeSlideshow < os.time() and mod.slideshow then
+	if lastTimeSlideshow + waitTimeSlideshow < os.time() and mod.slideshow and not loadingView then
 		mod.cycleImageSlideshow()
 		lastTimeSlideshow = os.time()
 	end
@@ -186,13 +189,19 @@ mod.on_setting_changed = function(setting_id)
 		for k, v in pairs(backgroundImageTableCuratedUrls) do
 			backgroundImageTableCuratedUrls[k] = { loaded = false }
 		end
+	elseif setting_id == "cycleImageLoadingInterval" then
+		waitTimeLoading = mod:get("cycleImageLoadingInterval")
 	elseif setting_id == "slideshowInterval" then
 		waitTimeSlideshow = mod:get("slideshowInterval")
 	end
 end
 
 mod:hook_safe("LoadingView", "on_enter", function(self)
+	loadingView = true
 	mod.showBG = true
+	if mod:get("cycleImageLoading") then
+		lastTimeSlideshow = os.time()
+	end
 	local randomImage = getRandomImage()
 	if not randomImage then
 		return
@@ -213,6 +222,11 @@ mod:hook_safe("LoadingView", "update", function(self)
 		return
 	end
 
+	if lastTimeSlideshow + waitTimeLoading < os.time() and mod.cycleImageLoading and loadingView then
+		mod.cycleImageSlideshow()
+		lastTimeSlideshow = os.time()
+	end
+
 	local backgroundWidget = self._widgets_by_name.background
 	local backgroundStyle = backgroundWidget.style.style_id_1
 
@@ -224,6 +238,7 @@ mod:hook_safe("LoadingView", "update", function(self)
 end)
 
 mod:hook_safe("LoadingView", "on_exit", function(self)
+	loadingView = false
 	mod.showBG = false
 	mod.slideshow = false
 end)
@@ -301,27 +316,29 @@ local getNextImage = function(n)
 end
 
 function mod.toggleSlideShow()
-	if not mod.showBG and not mod.slideshow then
-		local randomImage = getRandomImage()
-		if not randomImage then
-			return
+	if not loadingView then
+		if not mod.showBG and not mod.slideshow then
+			local randomImage = getRandomImage()
+			if not randomImage then
+				return
+			end
+			mod.showBG = true
+			mod.slideshow = true
+			lastTimeSlideshow = os.time()
+			mod.BGTexture = randomImage.texture
+		elseif mod.showBG and not mod.slideshow then
+			mod.slideshow = true
+			mod.cycleImageSlideshow()
+			lastTimeSlideshow = os.time()
+		else
+			mod.showBG = false
+			mod.slideshow = false
 		end
-		mod.showBG = true
-		mod.slideshow = true
-		lastTimeSlideshow = os.time()
-		mod.BGTexture = randomImage.texture
-	elseif mod.showBG and not mod.slideshow then
-		mod.slideshow = true
-		mod.cycleImageSlideshow()
-		lastTimeSlideshow = os.time()
-	else
-		mod.showBG = false
-		mod.slideshow = false
 	end
 end
 
 function mod.cycleImageSlideshow()
-	if mod.imgKey and mod.showBG and mod.slideshow then
+	if mod.imgKey and mod.showBG and (mod.slideshow or mod.cycleImageLoading) then
 		local imgCount = table.size(backgroundImageTableAll)
 		mod.imgKey = getNextImage(math.random(1, imgCount))
 		mod.BGTexture = backgroundImageTableAll[mod.imgKey].texture
