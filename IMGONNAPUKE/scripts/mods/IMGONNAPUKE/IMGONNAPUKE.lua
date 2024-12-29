@@ -7,10 +7,11 @@ local puke2 = mod:get("setting_puke2")
 local puke3 = mod:get("setting_puke3")
 local puke4 = mod:get("setting_puke4")
 local puke5 = mod:get("setting_puke5")
+local subtitles = mod:get("puke_subtitles")
+local subtitle_duration = mod:get("puke_subtitle_duration")
+local subtitles_element = Managers.ui:ui_constant_elements():element("ConstantElementSubtitles")
 local puke = {}
-
-
-
+local puke_subs = {}
 
 local LocalServer = get_mod("DarktideLocalServer")
 local Audio
@@ -41,20 +42,26 @@ local puke_update = function()
 	puke4 = mod:get("setting_puke4")
 	puke5 = mod:get("setting_puke5")
 	puke = {}
+	puke_subs = {}
 	if puke1 then
-		table.insert(puke,"audio/IMGONNAPUKE.mp3")
+		table.insert(puke, "audio/IMGONNAPUKE.mp3")
+		table.insert(puke_subs, mod:localize("subtitle_puke1"))
 	end
 	if puke2 then
 		table.insert(puke,"audio/IMGONNAPUKEIMGONNAPUKE.mp3")
+		table.insert(puke_subs, mod:localize("subtitle_puke2"))
 	end
 	if puke3 then
 		table.insert(puke,"audio/IMMAFUCKINTHROWUP.mp3")
+		table.insert(puke_subs, mod:localize("subtitle_puke3"))
 	end
 	if puke4 then
 		table.insert(puke,"audio/IMGONNAFUCKINGPUKE.mp3")
+		table.insert(puke_subs, mod:localize("subtitle_puke4"))
 	end
 	if puke5 then
 		table.insert(puke,"audio/BLUHBLUHBLUHBLUH.mp3")
+		table.insert(puke_subs, mod:localize("subtitle_puke5"))
 	end
 end
 
@@ -67,7 +74,7 @@ mod.on_enabled = function()
 end
 
 mod.on_game_state_changed = function()
-	puke_update()
+	--puke_update()
 end
 
 
@@ -79,9 +86,13 @@ mod.on_all_mods_loaded = function()
 			if next(puke) then
 				local pukeIndex = math.random(1,#puke)
 				local randomPuke = puke[pukeIndex]
+				local randomPukeSub = puke_subs[pukeIndex]
 				
 				if 100*math.random(0,1) <= puke_frequency then
 					Audio.play_file(randomPuke, { volume = puke_volume })
+					if subtitles then
+						subtitles_element:_display_text_line(randomPukeSub, subtitle_duration)
+					end
 				end
 			end
 
