@@ -1,3 +1,4 @@
+--needs a major refactor, but it works for now
 local mod = get_mod("CustomLoadingBackground")
 
 local localServer = get_mod("DarktideLocalServer")
@@ -245,20 +246,6 @@ end)
 
 mod.showBG = false
 mod.slideshow = false
-mod:add_require_path("CustomLoadingBackground/scripts/mods/CustomLoadingBackground/Modules/BackgroundElement")
-
-mod:hook("UIHud", "init", function(func, self, elements, visibility_groups, params)
-	if not table.find_by_key(elements, "class_name", "BackgroundElement") then
-		table.insert(elements, {
-			class_name = "BackgroundElement",
-			filename = "CustomLoadingBackground/scripts/mods/CustomLoadingBackground/Modules/BackgroundElement",
-			use_hud_scale = true,
-			visibility_groups = { "alive" },
-		})
-	end
-
-	return func(self, elements, visibility_groups, params)
-end)
 
 mod:command("bglist", "List all available backgrounds", function()
 	if not table.is_empty(backgroundImageTableAll) then
@@ -277,7 +264,7 @@ For now it will just show a single image based on the index given.
 Use /bglist to see the list of images and their index.
 
 ]] 
-mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(p)
+mod:command("bg", "View a background (usage: /bg #)", function(p)
 	local img = tonumber(p)
 	if img and (not mod.showBG or (mod.showBG and img)) and img > 0 then
 		if not table.is_empty(backgroundImageTableAll) and img <= table.size(backgroundImageTableAll) then
@@ -288,8 +275,14 @@ mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(
 			mod.showBG = true
 			loadAllImages()
 		end
+		Managers.ui:open_view("SlideShow_View")
+	elseif Managers.ui:view_instance("SlideShow_View") then
+		Managers.ui:close_view("SlideShow_View")
+		mod.showBG = false
+		mod.slideshow = false
 	else
 		mod.showBG = false
+		mod.slideshow = false
 	end
  end)
 
@@ -298,8 +291,8 @@ mod:command("bg", "View a background (usage: /bg # and /bg to close)", function(
 	mod:echo(localServer:get_root_mods_path():gsub('"', '') .. "\\CustomLoadingBackground\\scripts\\mods\\CustomLoadingBackground\\Images")
  end)
 
- mod:command("bgss", "Start a slideshow of all images (usage: /bgss to open and close)", function()
-	mod.toggleSlideShow()
+ mod:command("bgss", "Start a slideshow of all images (usage: /bgss to open)", function()
+	mod.toggleSlideShowView()
  end)
 
 local getNextImage = function(n)
@@ -308,31 +301,24 @@ local getNextImage = function(n)
 	local currentIndex = table.find(imageKeys, mod.imgKey)
 	local nextIndex = currentIndex + n
 	if nextIndex > #imageKeys then
-		nextIndex = 1
+		nextIndex = nextIndex - #imageKeys
 	elseif nextIndex < 1 then
-		nextIndex = #imageKeys
+		nextIndex = #imageKeys - nextIndex
 	end
 	return imageKeys[nextIndex]
 end
 
-function mod.toggleSlideShow()
+function mod.toggleBackground()
 	if not loadingView then
-		if not mod.showBG and not mod.slideshow then
+		if not mod.showBG then
 			local randomImage = getRandomImage()
 			if not randomImage then
 				return
 			end
 			mod.showBG = true
-			mod.slideshow = true
-			lastTimeSlideshow = os.time()
 			mod.BGTexture = randomImage.texture
-		elseif mod.showBG and not mod.slideshow then
-			mod.slideshow = true
-			mod.cycleImageSlideshow()
-			lastTimeSlideshow = os.time()
 		else
 			mod.showBG = false
-			mod.slideshow = false
 		end
 	end
 end
@@ -360,3 +346,68 @@ function mod.cycleImagePrev()
 		lastTimeSlideshow = os.time()
 	end
 end
+
+local UISoundEvents = require("scripts/settings/ui/ui_sound_events")
+local WwiseGameSyncSettings = require("scripts/settings/wwise_game_sync/wwise_game_sync_settings")
+
+mod:add_require_path("CustomLoadingBackground/scripts/mods/CustomLoadingBackground/Views/SlideShowView")
+
+local SlideShowViewRegisteredCorrectly = mod:register_view({
+	view_name = "SlideShow_View",
+	view_settings = {
+		init_view_function = function(ingame_ui_context)
+			return true
+		end,
+		state_bound = true,
+		path = "CustomLoadingBackground/scripts/mods/CustomLoadingBackground/Views/SlideShowView",
+		class = "SlideShowView",
+		disable_game_world = false,
+		load_always = true,
+		load_in_hub = true,
+		game_world_blur = 0,
+		enter_sound_events = {
+			UISoundEvents.system_menu_enter,
+		},
+		exit_sound_events = {
+			UISoundEvents.system_menu_exit,
+		},
+		wwise_states = {
+			options = WwiseGameSyncSettings.state_groups.options.ingame_menu,
+		},
+	},
+	view_transitions = {},
+	view_options = {
+		close_all = false,
+		close_previous = false,
+		close_transition_time = nil,
+		transition_time = nil,
+	},
+})
+
+mod.toggleSlideShowView = function()
+	if
+		not Managers.ui:has_active_view()
+		and not Managers.ui:chat_using_input()
+		and not Managers.ui:view_instance("SlideShow_View")
+	then
+		mod.showBG = true
+		mod.slideshow = true
+		
+		local randomImage = getRandomImage()
+		if not randomImage then
+			return
+		end
+		lastTimeSlideshow = os.time()
+		mod.BGTexture = randomImage.texture
+
+		Managers.ui:open_view("SlideShow_View")
+	elseif Managers.ui:view_instance("SlideShow_View") then
+		Managers.ui:close_view("SlideShow_View")
+		mod.showBG = false
+		mod.slideshow = false
+	end
+end
+
+mod:command("open_slideshow_view", "Open the slideshow view", function()
+	mod.toggleSlideShowView()
+end)

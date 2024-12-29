@@ -42,6 +42,9 @@ return {
 	cycleImageLoading = {
 		en = "Cycle images while loading"
 	},
+	cycleImageLoadingTooltip = {
+		en = "Automatically cycle through images while the game is loading",
+	},
 	cycleImageLoadingInterval = {
 		en = "Cycle loading image interval",
 	},

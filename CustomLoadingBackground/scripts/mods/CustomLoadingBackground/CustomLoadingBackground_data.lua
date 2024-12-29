@@ -38,15 +38,14 @@ return {
 						setting_id		= "cycleImageLoading",
 						type			= "checkbox",
 						default_value	= true,
-						tooltip			= "cycleImageLoading"
+						tooltip			= "cycleImageLoadingTooltip"
 					},
 					{
 						setting_id		= "cycleImageLoadingInterval",
 						type			= "numeric",
-						default_value	= 4,
+						default_value	= 5,
 						range			= { 1, 60 },
 						decimals_number	= 0,
-						tooltip			= "cycleImageLoadingInterval"
 					},
 					{
 						setting_id		= "cycleImageNext",
@@ -73,10 +72,9 @@ return {
 					{
 						setting_id		= "slideshowInterval",
 						type			= "numeric",
-						default_value	= 6,
+						default_value	= 8,
 						range			= { 1, 60 },
 						decimals_number	= 0,
-						tooltip			= "slideshowInterval"
 					},
 					{
 						setting_id		= "toggleSlideShow",
@@ -84,7 +82,7 @@ return {
 						default_value	= {},
 						keybind_trigger	= "pressed",
 						keybind_type	= "function_call",
-						function_name	= "toggleSlideShow",
+						function_name	= "toggleSlideShowView",
 					},
 				}
 			},
