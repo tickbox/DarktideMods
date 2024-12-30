@@ -192,6 +192,8 @@ mod.on_setting_changed = function(setting_id)
 		end
 	elseif setting_id == "cycleImageLoadingInterval" then
 		waitTimeLoading = mod:get("cycleImageLoadingInterval")
+	elseif setting_id == "cycleImageLoading" then
+		mod.cycleImageLoading = mod:get("cycleImageLoading")
 	elseif setting_id == "slideshowInterval" then
 		waitTimeSlideshow = mod:get("slideshowInterval")
 	end
