@@ -145,39 +145,66 @@ function poll_pdi_session_save()
     end
 end
 
+mod.results_text = function (wins, losses)
+    local r_wins = nil
+    local r_losses = nil
+    local l_wins = "+" .. wins
+    local l_losses = "-" .. losses
+    local win_ratio = wins / (wins + losses)
+    local loss_ratio = losses / (wins + losses)
+    if mod:get("win_bars") then
+        local wbars = math.modf((win_ratio * 100)/20)
+        local lbars = 5 - wbars
+        l_wins = string.rep("\xee\x81\x85", wbars)
+        l_losses = string.rep("\xee\x81\x85", lbars)
+    end
+    if mod:get("conditional_colors") then
+        r_wins = "{#color(0," .. math.floor(255 * win_ratio) .. ",0)}".. l_wins .. "{#reset()}"
+        r_losses = "{#color(" .. math.floor(255 * loss_ratio) .. ",0,0)}".. l_losses .. "{#reset()}"
+    else
+        r_wins = "{#color(0,128,0)}".. l_wins .. "{#reset()}"
+        r_losses = "{#color(255,0,0)}".. l_losses .. "{#reset()}"
+    end
+    if mod:get("win_bars") then
+        return r_wins .. r_losses
+    else
+        return r_wins .. " " .. r_losses
+    end
+end
+
 if true_level then
     mod:hook(true_level, "replace_level", function(func, text, true_levels, ...)
         local final_text = func(text, true_levels, ...)
         if Managers.presence._current_game_state_name ~= "StateMainMenu" then
-            local myself = Managers.presence._myself._character_profile.character_id
-            for _, tlself in pairs(true_level._self) do
-                if tlself.account_id == true_levels.account_id and diky_data.players[myself] then
-                    local diky_wins = diky_data.players[myself].won
-                    local diky_losses = diky_data.players[myself].lost
+            if mod:get("show_self") then
+                local myself = Managers.presence._myself._character_profile.character_id
+                for _, tlself in pairs(true_level._self) do
+                    if tlself.account_id == true_levels.account_id and diky_data.players[myself] then
+                        local diky_wins = diky_data.players[myself].won
+                        local diky_losses = diky_data.players[myself].lost
 
-                    local wins = "{#color(0,128,0)}+".. diky_wins .. "{#reset()}"
-                    local losses = "{#color(255,0,0)}-".. diky_losses .. "{#reset()}"
-                    local results = wins .. " " .. losses
+                        local results = mod.results_text(diky_wins, diky_losses)
 
-                    final_text = final_text .. " " .. results
-                    return final_text
+                        final_text = final_text .. " " .. results
+                        return final_text
+                    end
                 end
             end
-            for cid, tlothers in pairs(true_level._others) do
-                if tlothers.account_id == true_levels.account_id and diky_data.players[cid] then
-                    local diky_wins = diky_data.players[cid].won
-                    local diky_losses = diky_data.players[cid].lost
+            if mod:get("show_others") then
+                for cid, tlothers in pairs(true_level._others) do
+                    if tlothers.account_id == true_levels.account_id and diky_data.players[cid] then
+                        local diky_wins = diky_data.players[cid].won
+                        local diky_losses = diky_data.players[cid].lost
 
-                    local wins = "{#color(0,128,0)}+".. diky_wins .. "{#reset()}"
-                    local losses = "{#color(255,0,0)}-".. diky_losses .. "{#reset()}"
-                    local results = wins .. " " .. losses
+                        local results = mod.results_text(diky_wins, diky_losses)
 
-                    if final_text:find("\n", 1, true) then
-                        final_text = final_text:gsub("^(.-)\n(.*)", "%1".. " " .. results .."\n%2")
-                    else
-                        final_text = final_text .. " " .. results
+                        if final_text:find("\n", 1, true) then
+                            final_text = final_text:gsub("^(.-)\n(.*)", "%1".. " " .. results .."\n%2")
+                        else
+                            final_text = final_text .. " " .. results
+                        end
+                        return final_text
                     end
-                    return final_text
                 end
             end
         end
