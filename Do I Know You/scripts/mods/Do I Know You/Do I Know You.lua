@@ -23,7 +23,13 @@ function check_dependencies()
 end
 
 function verify_save_file()
-    local filepath = Mods.lua.os.getenv('APPDATA') .. "\\Fatshark\\Darktide\\do_i_know_you.sav"
+    local filepath = nil
+    local authenticate_method = Managers.backend:get_auth_method()
+    if authenticate_method == 1 then
+        filepath = Mods.lua.os.getenv('APPDATA') .. "\\Fatshark\\Darktide\\do_i_know_you.sav"
+    elseif authenticate_method == 2 then
+        filepath = Mods.lua.os.getenv('APPDATA') .. "\\Fatshark\\MicrosoftStore\\Darktide\\do_i_know_you.sav"
+    end
     local file_exists = Mods.lua.io.open(filepath, "r")
     if file_exists then
         Mods.lua.io.close(file_exists)
