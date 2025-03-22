@@ -2,6 +2,10 @@ local mod = get_mod("Do I Know You")
 local true_level = get_mod("true_level")
 local PDI = get_mod("Power_DI")
 
+local diky_time = os.time()
+local pdi_save_time = os.time()
+local session_save_time = os.time()
+local wait_time = 10
 local diky_save_token = nil
 local diky_data = {}
 local pdi_save_token = nil
@@ -40,6 +44,7 @@ function verify_save_file()
 end
 
 function start_loading_diky_data()
+    diky_time = os.time()
     if not diky_save_token and verify_save_file() then
         diky_data.loaded = false
         diky_save_token = SaveSystem.auto_load("do_i_know_you")
@@ -51,6 +56,7 @@ end
 
 function start_loading_pdi_data()
     if not pdi_save_token then
+        pdi_save_time = os.time()
         pdi_save_token = SaveSystem.auto_load("power_di")
     end
 end
@@ -70,6 +76,12 @@ function poll_diky_save()
         SaveSystem.close(diky_save_token)
         diky_save_token = nil
         diky_data.loaded = true
+    end
+    if not diky_data.loaded and os.time() - diky_time > wait_time then
+        mod:notify("Do I Know You: failed to load data.")
+        SaveSystem.close(diky_save_token)
+        diky_save_token = nil
+        start_loading_diky_data()
     end
 end
 
@@ -93,6 +105,11 @@ function poll_pdi_save()
         SaveSystem.close(pdi_save_token)
         pdi_save_token = nil
     end
+    if os.time() - pdi_save_time > wait_time then
+        mod:notify("Do I Know You: failed to load Power DI data.")
+        SaveSystem.close(pdi_save_token)
+        pdi_save_token = nil
+    end
 end
 
 function poll_pdi_session_save()
@@ -100,6 +117,7 @@ function poll_pdi_session_save()
         local next_session_id = table.remove(session_queue, 1)
         
         local file_name = next_session_id:lower():gsub("-", "_")
+        session_wait_time = os.time()
         session_save_token = SaveSystem.auto_load(file_name)
         session_save_status[next_session_id] = {}
     end
@@ -141,6 +159,11 @@ function poll_pdi_session_save()
             if #session_queue == 0 and not session_save_token then
                 diky_save_token = SaveSystem.auto_save("do_i_know_you", diky_data)
             end
+        end
+        if os.time() - session_wait_time > wait_time then
+            mod:notify("Do I Know You: failed to load Power DI session data.")
+            SaveSystem.close(session_save_token)
+            session_save_token = nil
         end
     end
 end
