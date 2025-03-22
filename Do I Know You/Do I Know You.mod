@@ -8,5 +8,13 @@ return {
 			mod_localization = "Do I Know You/scripts/mods/Do I Know You/Do I Know You_localization",
 		})
 	end,
+	load_after = {
+		"Power_DI",
+		"true_level",
+	},
+	require = {
+		"Power_DI",
+		"true_level",
+	},
 	packages = {},
 }
