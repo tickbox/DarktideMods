@@ -168,6 +168,19 @@ function poll_pdi_session_save()
     end
 end
 
+function check_true_level_settings()
+    return {
+        end_view = mod:get("tls_end_view"),
+        group_finder = mod:get("tls_group_finder"),
+        inspect_player = mod:get("tls_inspect_player"),
+        inventory = mod:get("tls_inventory"),
+        lobby = mod:get("tls_lobby"),
+        nameplate = mod:get("tls_nameplate"),
+        social_menu = mod:get("tls_social_menu"),
+        team_panel = mod:get("tls_team_panel"),
+    }
+end
+
 mod.results_text = function (wins, losses)
     local r_wins = nil
     local r_losses = nil
@@ -196,8 +209,12 @@ mod.results_text = function (wins, losses)
 end
 
 if true_level then
-    mod:hook(true_level, "replace_level", function(func, text, true_levels, ...)
-        local final_text = func(text, true_levels, ...)
+    mod:hook(true_level, "replace_level", function(func, text, true_levels, reference, ...)
+        local tls = check_true_level_settings()
+        local final_text = func(text, true_levels, reference, ...)
+        if not tls[reference] then
+            return final_text
+        end
         if Managers.presence._current_game_state_name ~= "StateMainMenu" then
             if mod:get("show_self") then
                 local myself = Managers.presence._myself._character_profile.character_id

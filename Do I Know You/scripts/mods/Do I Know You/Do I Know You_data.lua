@@ -34,6 +34,69 @@ return {
 				tooltip = "win_bars_tooltip",
 				title = "win_bars_title",
 			},
+			{
+				setting_id = "true_level_settings",
+				type = "group",
+				title = "true_level_settings_title",
+				sub_widgets = {
+					{
+						setting_id = "tls_end_view",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_end_view_tooltip",
+						title = "tls_end_view_title",
+					},
+					{
+						setting_id = "tls_group_finder",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_group_finder_tooltip",
+						title = "tls_group_finder_title",
+					},
+					{
+						setting_id = "tls_inspect_player",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_inspect_player_tooltip",
+						title = "tls_inspect_player_title",
+					},
+					{
+						setting_id = "tls_inventory",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_inventory_tooltip",
+						title = "tls_inventory_title",
+					},
+					{
+						setting_id = "tls_lobby",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_lobby_tooltip",
+						title = "tls_lobby_title",
+					},
+					{
+						setting_id = "tls_nameplate",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_nameplate_tooltip",
+						title = "tls_nameplate_title",
+					},
+					{
+						setting_id = "tls_social_menu",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_social_menu_tooltip",
+						title = "tls_social_menu_title",
+					},
+					{
+						setting_id = "tls_team_panel",
+						type = "checkbox",
+						default_value = true,
+						tooltip = "tls_team_panel_tooltip",
+						title = "tls_team_panel_title",
+					},
+				},
+			}
 		},
 	}
 }
