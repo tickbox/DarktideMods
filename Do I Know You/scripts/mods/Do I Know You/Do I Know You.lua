@@ -9,6 +9,7 @@ local wait_time = 10
 local diky_save_token = nil
 local diky_data = {}
 local pdi_save_token = nil
+local pdi_save_loaded = false
 local session_save_token = nil
 local session_save_status = {}
 local session_queue = {}
@@ -26,13 +27,13 @@ function check_dependencies()
 	end
 end
 
-function verify_save_file()
+function verify_save_file(filename)
     local filepath = nil
     local authenticate_method = Managers.backend:get_auth_method()
     if authenticate_method == 1 then
-        filepath = Mods.lua.os.getenv('APPDATA') .. "\\Fatshark\\Darktide\\do_i_know_you.sav"
+        filepath = Mods.lua.os.getenv('APPDATA') .. "\\Fatshark\\Darktide\\" .. filename .. ".sav"
     elseif authenticate_method == 2 then
-        filepath = Mods.lua.os.getenv('APPDATA') .. "\\Fatshark\\MicrosoftStore\\Darktide\\do_i_know_you.sav"
+        filepath = Mods.lua.os.getenv('APPDATA') .. "\\Fatshark\\MicrosoftStore\\Darktide\\" .. filename .. ".sav"
     end
     local file_exists = Mods.lua.io.open(filepath, "r")
     if file_exists then
@@ -45,7 +46,7 @@ end
 
 function start_loading_diky_data()
     diky_time = os.time()
-    if not diky_save_token and verify_save_file() then
+    if not diky_save_token and verify_save_file("do_i_know_you") then
         diky_data.loaded = false
         diky_save_token = SaveSystem.auto_load("do_i_know_you")
     else
@@ -67,7 +68,7 @@ function poll_diky_save()
     end
 
     local progress = SaveSystem.progress(diky_save_token)
-    if progress and progress.done then
+    if progress and progress.done and progress.data then
         local data = progress.data
         if data then
             diky_data.sessions = data.sessions
@@ -91,7 +92,7 @@ function poll_pdi_save()
     end
 
     local progress = SaveSystem.progress(pdi_save_token)
-    if progress and progress.done then
+    if progress and progress.done and progress.data then
         local data = progress.data
         for _, session_id in ipairs(data.sessions_index) do
             if not diky_data.sessions[session_id] then
@@ -104,9 +105,12 @@ function poll_pdi_save()
         end
         SaveSystem.close(pdi_save_token)
         pdi_save_token = nil
+        if #session_queue > 0 then
+            pdi_save_loaded = true
+        end
     end
     if os.time() - pdi_save_time > wait_time then
-        mod:notify("Do I Know You: failed to load Power DI data.")
+        --mod:notify("Do I Know You: failed to load Power DI data.")
         SaveSystem.close(pdi_save_token)
         pdi_save_token = nil
     end
@@ -117,14 +121,19 @@ function poll_pdi_session_save()
         local next_session_id = table.remove(session_queue, 1)
         
         local file_name = next_session_id:lower():gsub("-", "_")
-        session_wait_time = os.time()
-        session_save_token = SaveSystem.auto_load(file_name)
-        session_save_status[next_session_id] = {}
+        if verify_save_file(file_name) then
+            session_save_time = os.time()
+            session_save_token = SaveSystem.auto_load(file_name)
+            session_save_status[next_session_id] = {}
+        else
+            session_save_status[next_session_id] = {}
+            return
+        end
     end
 
     if session_save_token then
         local progress = SaveSystem.progress(session_save_token)
-        if progress and progress.done then
+        if progress and progress.done and progress.data then
             local data = progress.data
             if data then
                 local session_id
@@ -160,8 +169,8 @@ function poll_pdi_session_save()
                 diky_save_token = SaveSystem.auto_save("do_i_know_you", diky_data)
             end
         end
-        if os.time() - session_wait_time > wait_time then
-            mod:notify("Do I Know You: failed to load Power DI session data.")
+        if os.time() - session_save_time > wait_time then
+            --mod:notify("Do I Know You: failed to load Power DI session data.")
             SaveSystem.close(session_save_token)
             session_save_token = nil
         end
@@ -254,15 +263,21 @@ end
 
 mod.update = function (dt)
     poll_diky_save()
-    if diky_data.loaded then
+    if diky_data.loaded and Managers.presence._current_game_state_name == "StateLoading" then
         poll_pdi_save()
-        poll_pdi_session_save()
+        if pdi_save_loaded then
+            poll_pdi_session_save()
+        end
     end
 end
 
 mod.on_game_state_changed = function (status, state_name)
     if status == "enter" and state_name == "StateLoading" then
-        start_loading_pdi_data()
+        session_save_time = os.time()
+        if verify_save_file("power_di") and #session_queue == 0 then
+            pdi_save_loaded = false
+            start_loading_pdi_data()
+        end
     end
 end
 
