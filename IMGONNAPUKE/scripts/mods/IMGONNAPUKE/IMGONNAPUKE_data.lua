@@ -33,6 +33,11 @@ return {
 				decimals_number	= 0,
 			},
 			{
+				setting_id 		= "puke_death",
+				type 			= "checkbox",
+				default_value 	= true,
+			},
+			{
 				setting_id		= "puke_group",
 				type			= "group",
 				sub_widgets		= {

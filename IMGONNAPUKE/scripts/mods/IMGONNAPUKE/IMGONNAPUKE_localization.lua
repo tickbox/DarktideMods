@@ -50,4 +50,10 @@ return {
 	puke_subtitle_duration = {
 		en = "SUBTITLE DURATION",
 	},
+	puke_death = {
+		en = "ENABLE DEATH MESSAGE"
+	},
+	puke_subtitle_death = {
+		en = "MCCONNELL: THAT THING'S BROKEN... AS HELL. THAT THING'S NEVER GONNA FUNCTION AGAIN."
+	}
 }

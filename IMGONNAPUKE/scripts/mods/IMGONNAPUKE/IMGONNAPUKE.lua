@@ -7,6 +7,7 @@ local puke2 = mod:get("setting_puke2")
 local puke3 = mod:get("setting_puke3")
 local puke4 = mod:get("setting_puke4")
 local puke5 = mod:get("setting_puke5")
+local puke_death = mod:get("puke_death")
 local subtitles = mod:get("puke_subtitles")
 local subtitle_duration = mod:get("puke_subtitle_duration")
 local subtitles_element = Managers.ui:ui_constant_elements():element("ConstantElementSubtitles")
@@ -41,6 +42,7 @@ local puke_update = function()
 	puke3 = mod:get("setting_puke3")
 	puke4 = mod:get("setting_puke4")
 	puke5 = mod:get("setting_puke5")
+	puke_death = mod:get("puke_death")
 	puke = {}
 	puke_subs = {}
 	if puke1 then
@@ -98,4 +100,15 @@ mod.on_all_mods_loaded = function()
 
         end
     )
+
+	if puke_death then
+		Audio.hook_sound("play_beast_of_nurgle_dissolve",
+			function()
+				Audio.play_file("audio/broken.mp3", { volume = puke_volume })
+				if subtitles then
+					subtitles_element:_display_text_line(mod:localize("puke_subtitle_death"), subtitle_duration)
+				end
+			end
+		)
+	end
 end
