@@ -44,6 +44,12 @@ return {
 	subtitle_puke5 = {
 		en = "MCCONNELL: (BLUH BLUH BLUH BLUH)"
 	},
+	setting_puke6 = {
+		en = "Ooouuahhh"
+	},
+	subtitle_puke6 = {
+		en = "MCCONNELL: I'M EJECTING! I'M EJECTING! ... (OOOUUAHHH)"
+	},
 	puke_subtitles = {
 		en = "ENABLE SUBTITLES",
 	},

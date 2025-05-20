@@ -65,7 +65,12 @@ return {
 						setting_id		= "setting_puke5",
 						type			= "checkbox",
 						default_value	= true
-					}
+					},
+					{
+						setting_id		= "setting_puke6",
+						type			= "checkbox",
+						default_value	= true
+					},
 				}
 			},
 		},

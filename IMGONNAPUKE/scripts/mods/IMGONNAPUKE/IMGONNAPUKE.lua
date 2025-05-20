@@ -7,6 +7,7 @@ local puke2 = mod:get("setting_puke2")
 local puke3 = mod:get("setting_puke3")
 local puke4 = mod:get("setting_puke4")
 local puke5 = mod:get("setting_puke5")
+local puke6 = mod:get("setting_puke6")
 local puke_death = mod:get("puke_death")
 local subtitles = mod:get("puke_subtitles")
 local subtitle_duration = mod:get("puke_subtitle_duration")
@@ -42,6 +43,7 @@ local puke_update = function()
 	puke3 = mod:get("setting_puke3")
 	puke4 = mod:get("setting_puke4")
 	puke5 = mod:get("setting_puke5")
+	puke6 = mod:get("setting_puke6")
 	puke_death = mod:get("puke_death")
 	puke = {}
 	puke_subs = {}
@@ -64,6 +66,10 @@ local puke_update = function()
 	if puke5 then
 		table.insert(puke,"audio/BLUHBLUHBLUHBLUH.mp3")
 		table.insert(puke_subs, mod:localize("subtitle_puke5"))
+	end
+	if puke6 then
+		table.insert(puke,"audio/IMEJECTINGIMEJECTING.mp3")
+		table.insert(puke_subs, mod:localize("subtitle_puke6"))
 	end
 end
 
