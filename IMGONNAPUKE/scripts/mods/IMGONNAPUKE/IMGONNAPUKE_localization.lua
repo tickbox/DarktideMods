@@ -11,6 +11,9 @@ return {
 	puke_frequency = {
 		en = "PUKE FREQUENCY",
 	},
+	puke_position = {
+		en = "POSITIONAL PUKING",
+	},
 	puke_group = {
 		en = "PUKE TOGGLE",
 	},

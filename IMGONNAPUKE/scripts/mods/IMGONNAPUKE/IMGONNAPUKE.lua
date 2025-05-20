@@ -38,6 +38,7 @@ end
 local puke_update = function()
 	puke_volume = mod:get("puke_volume")
 	puke_frequency = mod:get("puke_frequency")
+	puke_position = mod:get("puke_position")
 	puke1 = mod:get("setting_puke1")
 	puke2 = mod:get("setting_puke2")
 	puke3 = mod:get("setting_puke3")
@@ -89,15 +90,27 @@ end
 mod.on_all_mods_loaded = function()
 	check_dependencies()
 
+	local nurgle_unit
+
+	Audio.hook_sound("play_beast_of_nurgle_spawn",
+		function(sound_type, sound_name, delta, position_or_unit_or_id, optional_a, optional_b)
+			nurgle_unit = optional_a
+		end
+	)
+
     Audio.hook_sound("play_beast_of_nurgle_vomit_aoe",
-        function()
+        function(sound_type, sound_name, delta, position_or_unit_or_id, optional_a, optional_b)
 			if next(puke) then
 				local pukeIndex = math.random(1,#puke)
 				local randomPuke = puke[pukeIndex]
 				local randomPukeSub = puke_subs[pukeIndex]
 				
 				if 100*math.random(0,1) <= puke_frequency then
-					Audio.play_file(randomPuke, { volume = puke_volume })
+					if puke_position then
+						Audio.play_file(randomPuke, { volume = puke_volume }, nurgle_unit)
+					else
+						Audio.play_file(randomPuke, { volume = puke_volume })
+					end
 					if subtitles then
 						subtitles_element:_display_text_line(randomPukeSub, subtitle_duration)
 					end

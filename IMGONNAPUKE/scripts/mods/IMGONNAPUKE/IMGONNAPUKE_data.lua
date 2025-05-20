@@ -21,6 +21,11 @@ return {
 				decimals_number	= 0,
 			},
 			{
+				setting_id		= "puke_position",
+				type			= "checkbox",
+				default_value	= true,
+			},
+			{
 				setting_id		= "puke_subtitles",
 				type			= "checkbox",
 				default_value	= true,
