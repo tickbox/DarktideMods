@@ -8,5 +8,13 @@ return {
 			mod_localization = "IMGONNAPUKE/scripts/mods/IMGONNAPUKE/IMGONNAPUKE_localization",
 		})
 	end,
+	load_after = {
+		"DarktideLocalServer",
+		"Audio",
+	},
+	require = {
+		"DarktideLocalServer",
+		"Audio",
+	},
 	packages = {},
 }

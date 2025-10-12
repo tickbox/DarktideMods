@@ -21,6 +21,11 @@ return {
 				decimals_number	= 0,
 			},
 			{
+				setting_id		= "puke_position",
+				type			= "checkbox",
+				default_value	= true,
+			},
+			{
 				setting_id		= "puke_subtitles",
 				type			= "checkbox",
 				default_value	= true,
@@ -31,6 +36,11 @@ return {
 				range			= { 0, 10 },
 				default_value	= 3,
 				decimals_number	= 0,
+			},
+			{
+				setting_id 		= "puke_death",
+				type 			= "checkbox",
+				default_value 	= true,
 			},
 			{
 				setting_id		= "puke_group",
@@ -60,7 +70,12 @@ return {
 						setting_id		= "setting_puke5",
 						type			= "checkbox",
 						default_value	= true
-					}
+					},
+					{
+						setting_id		= "setting_puke6",
+						type			= "checkbox",
+						default_value	= true
+					},
 				}
 			},
 		},

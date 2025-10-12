@@ -11,6 +11,9 @@ return {
 	puke_frequency = {
 		en = "PUKE FREQUENCY",
 	},
+	puke_position = {
+		en = "POSITIONAL PUKING",
+	},
 	puke_group = {
 		en = "PUKE TOGGLE",
 	},
@@ -44,10 +47,22 @@ return {
 	subtitle_puke5 = {
 		en = "MCCONNELL: (BLUH BLUH BLUH BLUH)"
 	},
+	setting_puke6 = {
+		en = "Ooouuahhh"
+	},
+	subtitle_puke6 = {
+		en = "MCCONNELL: I'M EJECTING! I'M EJECTING! ... (OOOUUAHHH)"
+	},
 	puke_subtitles = {
 		en = "ENABLE SUBTITLES",
 	},
 	puke_subtitle_duration = {
 		en = "SUBTITLE DURATION",
 	},
+	puke_death = {
+		en = "ENABLE DEATH MESSAGE"
+	},
+	puke_subtitle_death = {
+		en = "MCCONNELL: THAT THING'S BROKEN... AS HELL. THAT THING'S NEVER GONNA FUNCTION AGAIN."
+	}
 }

@@ -7,6 +7,8 @@ local puke2 = mod:get("setting_puke2")
 local puke3 = mod:get("setting_puke3")
 local puke4 = mod:get("setting_puke4")
 local puke5 = mod:get("setting_puke5")
+local puke6 = mod:get("setting_puke6")
+local puke_death = mod:get("puke_death")
 local subtitles = mod:get("puke_subtitles")
 local subtitle_duration = mod:get("puke_subtitle_duration")
 local subtitles_element = Managers.ui:ui_constant_elements():element("ConstantElementSubtitles")
@@ -36,11 +38,14 @@ end
 local puke_update = function()
 	puke_volume = mod:get("puke_volume")
 	puke_frequency = mod:get("puke_frequency")
+	puke_position = mod:get("puke_position")
 	puke1 = mod:get("setting_puke1")
 	puke2 = mod:get("setting_puke2")
 	puke3 = mod:get("setting_puke3")
 	puke4 = mod:get("setting_puke4")
 	puke5 = mod:get("setting_puke5")
+	puke6 = mod:get("setting_puke6")
+	puke_death = mod:get("puke_death")
 	puke = {}
 	puke_subs = {}
 	if puke1 then
@@ -63,6 +68,10 @@ local puke_update = function()
 		table.insert(puke,"audio/BLUHBLUHBLUHBLUH.mp3")
 		table.insert(puke_subs, mod:localize("subtitle_puke5"))
 	end
+	if puke6 then
+		table.insert(puke,"audio/IMEJECTINGIMEJECTING.mp3")
+		table.insert(puke_subs, mod:localize("subtitle_puke6"))
+	end
 end
 
 mod.on_setting_changed = function()
@@ -81,15 +90,27 @@ end
 mod.on_all_mods_loaded = function()
 	check_dependencies()
 
+	local nurgle_unit
+
+	Audio.hook_sound("play_beast_of_nurgle_spawn",
+		function(sound_type, sound_name, delta, position_or_unit_or_id, optional_a, optional_b)
+			nurgle_unit = optional_a
+		end
+	)
+
     Audio.hook_sound("play_beast_of_nurgle_vomit_aoe",
-        function()
+        function(sound_type, sound_name, delta, position_or_unit_or_id, optional_a, optional_b)
 			if next(puke) then
 				local pukeIndex = math.random(1,#puke)
 				local randomPuke = puke[pukeIndex]
 				local randomPukeSub = puke_subs[pukeIndex]
 				
 				if 100*math.random(0,1) <= puke_frequency then
-					Audio.play_file(randomPuke, { volume = puke_volume })
+					if puke_position then
+						Audio.play_file(randomPuke, { volume = puke_volume }, nurgle_unit)
+					else
+						Audio.play_file(randomPuke, { volume = puke_volume })
+					end
 					if subtitles then
 						subtitles_element:_display_text_line(randomPukeSub, subtitle_duration)
 					end
@@ -98,4 +119,15 @@ mod.on_all_mods_loaded = function()
 
         end
     )
+
+	if puke_death then
+		Audio.hook_sound("play_beast_of_nurgle_dissolve",
+			function()
+				Audio.play_file("audio/broken.mp3", { volume = puke_volume })
+				if subtitles then
+					subtitles_element:_display_text_line(mod:localize("puke_subtitle_death"), subtitle_duration)
+				end
+			end
+		)
+	end
 end
