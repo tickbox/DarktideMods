@@ -6,7 +6,7 @@ return {
 	is_togglable = true,
 	options = {
 		widgets = {
-			{
+			--[[ {
 				setting_id	= "groupLoading",
 				type		= "group",
 				sub_widgets = {
@@ -29,7 +29,7 @@ return {
 						tooltip			= "loadCuratedTooltip"
 					},
 				}
-			},
+			}, ]]
 			{
 				setting_id	= "groupCycleImages",
 				type		= "group",

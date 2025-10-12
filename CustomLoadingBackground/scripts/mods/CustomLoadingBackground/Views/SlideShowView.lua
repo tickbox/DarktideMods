@@ -1,5 +1,3 @@
--- Thanks to Seventeen Ducks in a trenchcoat for the CustomViewBoilerplate mod!
--- https://github.com/ronvoluted/darktide-mods/tree/c4db1d24eb9d973f70a2a7062e0fd557d4d4bc6a/CustomViewBoilerplate/scripts/mods/CustomViewBoilerplate
 local mod = get_mod("CustomLoadingBackground")
 
 local UIWidget = require("scripts/managers/ui/ui_widget")
@@ -55,18 +53,51 @@ local definitions = {
     },
 }
 
+local function _get_bg_style(self)
+    local w = self._widgets_by_name and self._widgets_by_name.BackgroundWidget
+    local style = w and w.style
+    return style and (style.BackgroundElementFrames or style.texture or style.background or style) or nil
+end
+
+local function _apply_bg_style(style, texture, show_flag)
+    if not style then return end
+    style.material_values = style.material_values or {}
+    style.color = style.color or {255,255,255,255}
+    if show_flag and texture then
+        style.material_values.texture_map = texture
+        style.visible = true
+        style.color[1] = 255
+    else
+        style.material_values.texture_map = nil
+        style.visible = false
+        style.color[1] = 0
+    end
+end
+
 SlideShowView = class("SlideShowView", "BaseView")
 
 SlideShowView.init = function(self, settings)
     SlideShowView.super.init(self, definitions, settings)
-
-    BackgroundElementFrames = self._widgets_by_name.BackgroundWidget.style.BackgroundElementFrames
+    self._bg_style = _get_bg_style(self)
+    --mod:echo("[CLB] SlideShowView.init")
 end
 
 SlideShowView.on_enter = function(self)
     SlideShowView.super.on_enter(self)
 
     self:_setup_input_legend()
+
+    -- Resolve style safely each time
+    self._bg_style = self._bg_style or _get_bg_style(self)
+
+    local tex = nil
+    do
+        local t = mod.BGTexture
+        local tt = type(t)
+        if tt == "userdata" or tt == "string" then tex = t end
+    end
+
+    _apply_bg_style(self._bg_style, tex, mod.showBG == true)
 end
 
 SlideShowView._setup_input_legend = function(self)
@@ -109,17 +140,21 @@ SlideShowView._destroy_renderer = function(self)
 end
 
 SlideShowView.update = function(self, dt, t, input_service)
-    if mod.showBG then
-        BackgroundElementFrames.visible = true
-    else
-        BackgroundElementFrames.visible = false
+    if not self._logged_first_update then
+        --mod:echo("[CLB] SlideShowView.update first tick")
+        self._logged_first_update = true
     end
 
-    if not BackgroundElementFrames.material_values then
-        BackgroundElementFrames.material_values = {}
+    self._bg_style = self._bg_style or _get_bg_style(self)
+
+    local tex = nil
+    do
+        local t = mod.BGTexture
+        local tt = type(t)
+        if tt == "userdata" or tt == "string" then tex = t end
     end
 
-    BackgroundElementFrames.material_values.texture_map = mod.BGTexture
+    _apply_bg_style(self._bg_style, tex, mod.showBG == true)
 
     return SlideShowView.super.update(self, dt, t, input_service)
 end
@@ -136,6 +171,7 @@ SlideShowView.on_exit = function(self)
     SlideShowView.super.on_exit(self)
 
     self:_destroy_renderer()
+    --mod:echo("[CLB] SlideShowView.on_exit")
 end
 
 return SlideShowView
