@@ -8,5 +8,9 @@ return {
 			mod_localization = "CustomLoadingBackground/scripts/mods/CustomLoadingBackground/CustomLoadingBackground_localization",
 		})
 	end,
+	load_after = {
+		"DarktideLocalServer",
+	},
+	require = {},
 	packages = {},
 }
