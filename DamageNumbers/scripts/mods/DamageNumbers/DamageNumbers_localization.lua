@@ -1,0 +1,40 @@
+return {
+    mod_name = {
+        en = "Damage Numbers",
+    },
+    mod_description = {
+        en = "Shows in-world damage numbers at the hit position.",
+    },
+
+    group_main_title = { en = "Controls" },
+    group_behavior_title = { en = "Behavior" },
+    group_appearance_title = { en = "Appearance" },
+    group_colors_title = { en = "Colors" },
+
+    toggle_enabled_title = { en = "Toggle Enabled" },
+    toggle_enabled_tooltip = { en = "Toggle damage numbers on/off." },
+
+    lifetime_seconds_title = { en = "Lifetime (seconds)" },
+    lifetime_seconds_tt = { en = "How long each number stays visible." },
+    rise_speed_px_title = { en = "Rise Speed (px/s)" },
+    rise_speed_px_tt = { en = "How fast the number rises upward (screen pixels per second)." },
+    vertical_lift_m_title = { en = "Vertical Lift (meters)" },
+    vertical_lift_m_tt = { en = "Offset above the hit point where the number starts." },
+
+    text_size_base_title = { en = "Text Size - Normal" },
+    text_size_base_tt = { en = "Font size for normal hits." },
+    text_size_weak_title = { en = "Text Size - Weakspot" },
+    text_size_weak_tt = { en = "Font size for weakspot hits." },
+    text_size_crit_title = { en = "Text Size - Critical" },
+    text_size_crit_tt = { en = "Font size for critical hits." },
+
+    color_normal_r_title = { en = "Normal R" },
+    color_normal_g_title = { en = "Normal G" },
+    color_normal_b_title = { en = "Normal B" },
+    color_weak_r_title = { en = "Weakspot R" },
+    color_weak_g_title = { en = "Weakspot G" },
+    color_weak_b_title = { en = "Weakspot B" },
+    color_crit_r_title = { en = "Crit R" },
+    color_crit_g_title = { en = "Crit G" },
+    color_crit_b_title = { en = "Crit B" },
+}
