@@ -51,7 +51,7 @@ local function _spawn_damage_marker(damage, attacked_unit, is_crit, hit_weakspot
         life = (mod.get and mod:get("lifetime_seconds")) or DEFAULT_LIFETIME,
         rise_px = (mod.get and mod:get("rise_speed_px")) or DEFAULT_RISE_PX,
         lift = (mod.get and mod:get("vertical_lift_m")) or 0.2,
-        rand_x = (math.random() * 0.6 - 0.3),
+    screen_offset_y_px = (mod.get and mod:get("screen_offset_y_px")) or 24,
         hit_pos = hit_world_position,
         use_world_position = hit_world_position ~= nil,
         hit_dir = attack_direction,

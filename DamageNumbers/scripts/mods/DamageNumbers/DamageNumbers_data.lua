@@ -47,6 +47,15 @@ return {
                         title         = "rise_speed_px_title",
                     },
                     {
+                        setting_id    = "screen_offset_y_px",
+                        type          = "numeric",
+                        default_value = 24,
+                        range         = { 0, 200 },
+                        decimals_number = 0,
+                        tooltip       = "screen_offset_y_px_tt",
+                        title         = "screen_offset_y_px_title",
+                    },
+                    {
                         setting_id    = "vertical_lift_m",
                         type          = "numeric",
                         default_value = 0.2,

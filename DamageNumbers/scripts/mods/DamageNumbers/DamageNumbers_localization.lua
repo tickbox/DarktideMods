@@ -18,6 +18,8 @@ return {
     lifetime_seconds_tt = { en = "How long each number stays visible." },
     rise_speed_px_title = { en = "Rise Speed (px/s)" },
     rise_speed_px_tt = { en = "How fast the number rises upward (screen pixels per second)." },
+    screen_offset_y_px_title = { en = "Start Offset Y (px)" },
+    screen_offset_y_px_tt = { en = "Vertical screen offset above the hit point where the number starts." },
     vertical_lift_m_title = { en = "Vertical Lift (meters)" },
     vertical_lift_m_tt = { en = "Offset above the hit point where the number starts." },
 
