@@ -31,11 +31,12 @@ local function _vec_xyz(vec)
     return nil, nil, nil
 end
 
+local POOL_SIZE = 64
+local DAMAGE_MARKER_PREFIX = "damage_numbers_hit#"
 mod._type_counter = mod._type_counter or 0
-local function _unique_marker_type()
-    mod._type_counter = (mod._type_counter % 0x7FFFFFFF) + 1
-    local t = (Managers.time and Managers.time:time("main")) or os.clock() or 0
-    return string.format("damage_numbers_hit_%d_%d", math.floor(t * 1000), mod._type_counter)
+local function _pooled_marker_type()
+    mod._type_counter = (mod._type_counter % POOL_SIZE) + 1
+    return string.format("%s%d", DAMAGE_MARKER_PREFIX, mod._type_counter)
 end
 
 local function _spawn_damage_marker(damage, attacked_unit, is_crit, hit_weakspot, hit_world_position, attack_direction)
@@ -55,16 +56,12 @@ local function _spawn_damage_marker(damage, attacked_unit, is_crit, hit_weakspot
         use_world_position = hit_world_position ~= nil,
         hit_dir = attack_direction,
     }
-    local marker_type = _unique_marker_type()
+    local marker_type = _pooled_marker_type()
 
     local ui = Managers.ui
     local hud = ui and ui:get_hud()
     local wm = hud and hud:element("HudElementWorldMarkers")
 
-    if wm and wm._marker_templates and not wm._marker_templates[marker_type] then
-        local DamageNumbersMarker = mod:io_dofile("DamageNumbers/scripts/mods/DamageNumbers/DamageNumbers_marker")
-        wm._marker_templates[marker_type] = DamageNumbersMarker
-    end
     if wm and wm.event_add_world_marker_unit then
         wm:event_add_world_marker_unit(marker_type, attacked_unit, nil, data)
     else
@@ -138,7 +135,6 @@ function mod.reset_settings_to_defaults()
     mod:echo("Damage Numbers: settings reset to defaults.")
 end
 
--- Chat command to reset settings
 mod:command("dmgnums_reset", "Reset Damage Numbers settings to defaults.", function()
     mod.reset_settings_to_defaults()
 end)
@@ -147,40 +143,38 @@ local DamageNumbersMarker = mod:io_dofile("DamageNumbers/scripts/mods/DamageNumb
 
 mod:hook_safe(CLASS.HudElementWorldMarkers, "init", function(self)
     self._marker_templates[DamageNumbersMarker.name] = DamageNumbersMarker
+    for i = 1, POOL_SIZE do
+        local name = string.format("%s%d", DAMAGE_MARKER_PREFIX, i)
+        self._marker_templates[name] = DamageNumbersMarker
+    end
 end)
 
 mod:hook_safe(CLASS.HudElementWorldMarkers, "event_add_world_marker_unit", function(self, marker_type, unit, callback, data)
-    if type(marker_type) == "string" and string.find(marker_type, "^damage_numbers_hit") then
-        if not self._marker_templates[marker_type] then
-            self._marker_templates[marker_type] = DamageNumbersMarker
-        end
-
+    if type(marker_type) == "string" and string.find(marker_type, "^" .. DAMAGE_MARKER_PREFIX) then
         local markers = self._markers_by_type and self._markers_by_type[marker_type]
-        if markers then
-            for i = #markers, 1, -1 do
-                local m = markers[i]
-                if m and m.unit == unit then
-                    m.data = data or m.data or {}
-                    local life = (m.data and m.data.life) or 1.6
-                    m.life_time = life
-                    m._dn_elapsed = 0
-                    local p = m.data and m.data.hit_pos
-                    if p then
-                        local x, y, z = _vec_xyz(p)
-                        if x and y and z then
-                            local lift = (m.data and m.data.lift) or 0.2
-                            local box = (Vector3Box and Vector3Box(x, y, z + lift)) or Vector3(x, y, z + lift)
-                            m.world_position = box
-                            m._dn_worldpos_box = box
-                            m.use_world_position = true
-                            m.unit_node = nil
-                            m.node_index = -1
-                        end
-                    end
-                    break
+        if not markers or not data or not data.hit_pos then return end
+
+        for i = #markers, 1, -1 do
+            local m = markers[i]
+            if m and m.unit == unit then
+                m.data = data or m.data or {}
+                local life = (m.data and m.data.life) or 1.6
+                m.life_time = life
+                m._dn_elapsed = 0
+                local x, y, z = _vec_xyz(m.data.hit_pos)
+                if x and y and z then
+                    local lift = (m.data and m.data.lift) or 0.2
+                    local box = (Vector3Box and Vector3Box(x, y, z + lift)) or Vector3(x, y, z + lift)
+                    m.world_position = box
+                    m._dn_worldpos_box = box
+                    m.use_world_position = true
+                    m.unit_node = nil
+                    m.node_index = -1
                 end
+                break
             end
         end
     end
 end)
+
 
