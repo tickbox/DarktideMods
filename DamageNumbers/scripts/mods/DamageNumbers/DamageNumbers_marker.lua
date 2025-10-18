@@ -110,8 +110,8 @@ template.update_function = function(parent, ui_renderer, widget, marker, _, dt, 
     content.text = text
 
     local rise_px = data.rise_px or 36
-    local xoff = 0
-    local yoff = -24 - (age * rise_px)
+    local base_y = -(data.screen_offset_y_px or 24)
+    local yoff = base_y - (age * rise_px)
     style.offset[1] = 0
     style.offset[2] = yoff
 

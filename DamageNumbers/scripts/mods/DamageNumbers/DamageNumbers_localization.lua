@@ -10,6 +10,8 @@ return {
     group_behavior_title = { en = "Behavior" },
     group_appearance_title = { en = "Appearance" },
     group_colors_title = { en = "Colors" },
+    group_filters_title = { en = "Filters" },
+    group_enemy_type_filters_title = { en = "Enemy Type Filters" },
 
     toggle_enabled_title = { en = "Toggle Enabled" },
     toggle_enabled_tooltip = { en = "Toggle damage numbers on/off." },
@@ -18,6 +20,8 @@ return {
     lifetime_seconds_tt = { en = "How long each number stays visible." },
     rise_speed_px_title = { en = "Rise Speed (px/s)" },
     rise_speed_px_tt = { en = "How fast the number rises upward (screen pixels per second)." },
+    screen_offset_y_px_title = { en = "Start Offset Y (px)" },
+    screen_offset_y_px_tt = { en = "Vertical screen offset above the hit point where the number starts." },
     vertical_lift_m_title = { en = "Vertical Lift (meters)" },
     vertical_lift_m_tt = { en = "Offset above the hit point where the number starts." },
 
@@ -37,4 +41,22 @@ return {
     color_crit_r_title = { en = "Crit R" },
     color_crit_g_title = { en = "Crit G" },
     color_crit_b_title = { en = "Crit B" },
+
+    show_base_hits_title = { en = "Show Base Hits" },
+    show_base_hits_tt = { en = "Show normal (non-weakspot, non-critical) damage numbers." },
+    show_weak_hits_title = { en = "Show Weakspot Hits" },
+    show_weak_hits_tt = { en = "Show weakspot damage numbers." },
+    show_crit_hits_title = { en = "Show Critical Hits" },
+    show_crit_hits_tt = { en = "Show critical hit damage numbers." },
+
+    show_type_boss_title    = { en = "Show Boss" },
+    show_type_boss_tt       = { en = "Show damage numbers for boss enemies." },
+    show_type_elite_title   = { en = "Show Elite" },
+    show_type_elite_tt      = { en = "Show damage numbers for elite enemies." },
+    show_type_special_title = { en = "Show Special" },
+    show_type_special_tt    = { en = "Show damage numbers for special enemies." },
+    show_type_captain_title = { en = "Show Captain" },
+    show_type_captain_tt    = { en = "Show damage numbers for captain enemies." },
+    show_type_minion_title  = { en = "Show Minion" },
+    show_type_minion_tt     = { en = "Show damage numbers for regular minion enemies." },
 }
