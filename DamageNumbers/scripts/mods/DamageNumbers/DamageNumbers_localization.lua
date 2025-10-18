@@ -10,6 +10,7 @@ return {
     group_behavior_title = { en = "Behavior" },
     group_appearance_title = { en = "Appearance" },
     group_colors_title = { en = "Colors" },
+    group_filters_title = { en = "Filters" },
 
     toggle_enabled_title = { en = "Toggle Enabled" },
     toggle_enabled_tooltip = { en = "Toggle damage numbers on/off." },
@@ -39,4 +40,11 @@ return {
     color_crit_r_title = { en = "Crit R" },
     color_crit_g_title = { en = "Crit G" },
     color_crit_b_title = { en = "Crit B" },
+
+    show_base_hits_title = { en = "Show Base Hits" },
+    show_base_hits_tt = { en = "Show normal (non-weakspot, non-critical) damage numbers." },
+    show_weak_hits_title = { en = "Show Weakspot Hits" },
+    show_weak_hits_tt = { en = "Show weakspot damage numbers." },
+    show_crit_hits_title = { en = "Show Critical Hits" },
+    show_crit_hits_tt = { en = "Show critical hit damage numbers." },
 }

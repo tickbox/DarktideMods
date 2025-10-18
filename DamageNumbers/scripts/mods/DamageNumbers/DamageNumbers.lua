@@ -98,7 +98,19 @@ mod:hook_safe(AttackReportManager, "add_attack_result", function(self, ...)
     
     local dmg = tonumber(damage) or 0
     if dmg > 0 and Managers.player:local_player(1).player_unit == attacking_unit then
-        _spawn_damage_marker(dmg, attacked_unit, is_critical_strike, hit_weakspot, hit_world_position, attack_direction)
+        local is_crit = is_critical_strike and true or false
+        local is_weak = (not is_crit) and (hit_weakspot and true or false)
+        local show_base = mod:get("show_base_hits")
+        local show_weak = mod:get("show_weak_hits")
+        local show_crit = mod:get("show_crit_hits")
+
+        if (is_crit and show_crit == false)
+            or (is_weak and show_weak == false)
+            or (not is_crit and not is_weak and show_base == false) then
+            return
+        end
+
+        _spawn_damage_marker(dmg, attacked_unit, is_crit, hit_weakspot, hit_world_position, attack_direction)
     end
 end)
 
@@ -127,6 +139,9 @@ function mod.reset_settings_to_defaults()
         color_crit_g = 80,
         color_crit_b = 80,
         toggle_enabled_key = {},
+        show_base_hits = true,
+        show_weak_hits = true,
+        show_crit_hits = true,
     }
     for k, v in pairs(defaults) do
         pcall(function() mod:set(k, v) end)

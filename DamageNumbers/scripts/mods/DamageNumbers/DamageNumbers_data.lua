@@ -66,6 +66,34 @@ return {
                     },
                 },
             },
+            {
+                setting_id = "group_filters",
+                type = "group",
+                title = "group_filters_title",
+                sub_widgets = {
+                    {
+                        setting_id    = "show_base_hits",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_base_hits_tt",
+                        title         = "show_base_hits_title",
+                    },
+                    {
+                        setting_id    = "show_weak_hits",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_weak_hits_tt",
+                        title         = "show_weak_hits_title",
+                    },
+                    {
+                        setting_id    = "show_crit_hits",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_crit_hits_tt",
+                        title         = "show_crit_hits_title",
+                    },
+                },
+            },
             --[[ {
                 setting_id = "group_appearance",
                 type = "group",
