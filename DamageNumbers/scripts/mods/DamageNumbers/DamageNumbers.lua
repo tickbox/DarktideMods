@@ -1,5 +1,7 @@
 local mod = get_mod("DamageNumbers")
 
+local breed = require("scripts/utilities/breed")
+
 local DEFAULT_LIFETIME = 1.8
 local DEFAULT_RISE_PX = 42
 
@@ -69,20 +71,6 @@ local function _spawn_damage_marker(damage, attacked_unit, is_crit, hit_weakspot
     end
 end
 
---[[
-    ... args:
-    damage_profile,
-    attacked_unit,
-    attacking_unit,
-    attack_direction,
-    hit_world_position,
-    hit_weakspot,
-    damage,
-    attack_result,
-    attack_type,
-    damage_efficiency,
-    is_critical_strike
-]]
 mod:hook_safe(AttackReportManager, "add_attack_result", function(self, ...)
     local damage_profile,
         attacked_unit,
@@ -97,12 +85,49 @@ mod:hook_safe(AttackReportManager, "add_attack_result", function(self, ...)
         is_critical_strike = ...
     
     local dmg = tonumber(damage) or 0
+
     if dmg > 0 and Managers.player:local_player(1).player_unit == attacking_unit then
+        local attacked_unit_breed = breed.unit_breed_or_nil(attacked_unit)
+        if not attacked_unit_breed then return end
+
+        local unit_data = ScriptUnit.has_extension(attacked_unit, "unit_data_system")
+        local is_boss = false
+        if unit_data and unit_data.breed then
+            local ok, b = pcall(function() return unit_data:breed() end)
+            if ok and b then is_boss = b.is_boss or false end
+        elseif attacked_unit_breed then
+            is_boss = attacked_unit_breed.is_boss or false
+        end
+
+        local attacked_unit_type = attacked_unit_breed and (breed.enemy_type(attacked_unit_breed) or attacked_unit_breed.breed_type) or nil
+
         local is_crit = is_critical_strike and true or false
         local is_weak = (not is_crit) and (hit_weakspot and true or false)
         local show_base = mod:get("show_base_hits")
         local show_weak = mod:get("show_weak_hits")
         local show_crit = mod:get("show_crit_hits")
+        local show_boss    = mod:get("show_type_boss")
+        local show_elite   = mod:get("show_type_elite")
+        local show_special = mod:get("show_type_special")
+        local show_captain = mod:get("show_type_captain")
+        local show_minion  = mod:get("show_type_minion")
+
+        local allow_type = true
+        if is_boss then
+            allow_type = show_boss ~= false
+        elseif attacked_unit_type == "elite" then
+            allow_type = show_elite ~= false
+        elseif attacked_unit_type == "special" then
+            allow_type = show_special ~= false
+        elseif attacked_unit_type == "captain" then
+            allow_type = show_captain ~= false
+        else
+            allow_type = show_minion ~= false
+        end
+
+        if not allow_type then
+            return
+        end
 
         if (is_crit and show_crit == false)
             or (is_weak and show_weak == false)
@@ -142,6 +167,11 @@ function mod.reset_settings_to_defaults()
         show_base_hits = true,
         show_weak_hits = true,
         show_crit_hits = true,
+        show_type_boss = true,
+        show_type_elite = true,
+        show_type_special = true,
+        show_type_captain = true,
+        show_type_minion = true,
     }
     for k, v in pairs(defaults) do
         pcall(function() mod:set(k, v) end)

@@ -11,6 +11,7 @@ return {
     group_appearance_title = { en = "Appearance" },
     group_colors_title = { en = "Colors" },
     group_filters_title = { en = "Filters" },
+    group_enemy_type_filters_title = { en = "Enemy Type Filters" },
 
     toggle_enabled_title = { en = "Toggle Enabled" },
     toggle_enabled_tooltip = { en = "Toggle damage numbers on/off." },
@@ -47,4 +48,15 @@ return {
     show_weak_hits_tt = { en = "Show weakspot damage numbers." },
     show_crit_hits_title = { en = "Show Critical Hits" },
     show_crit_hits_tt = { en = "Show critical hit damage numbers." },
+
+    show_type_boss_title    = { en = "Show Boss" },
+    show_type_boss_tt       = { en = "Show damage numbers for boss enemies." },
+    show_type_elite_title   = { en = "Show Elite" },
+    show_type_elite_tt      = { en = "Show damage numbers for elite enemies." },
+    show_type_special_title = { en = "Show Special" },
+    show_type_special_tt    = { en = "Show damage numbers for special enemies." },
+    show_type_captain_title = { en = "Show Captain" },
+    show_type_captain_tt    = { en = "Show damage numbers for captain enemies." },
+    show_type_minion_title  = { en = "Show Minion" },
+    show_type_minion_tt     = { en = "Show damage numbers for regular minion enemies." },
 }

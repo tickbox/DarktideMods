@@ -94,6 +94,48 @@ return {
                     },
                 },
             },
+            {
+                setting_id = "group_enemy_type_filters",
+                type = "group",
+                title = "group_enemy_type_filters_title",
+                sub_widgets = {
+                    {
+                        setting_id    = "show_type_boss",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_type_boss_tt",
+                        title         = "show_type_boss_title",
+                    },
+                    {
+                        setting_id    = "show_type_elite",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_type_elite_tt",
+                        title         = "show_type_elite_title",
+                    },
+                    {
+                        setting_id    = "show_type_special",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_type_special_tt",
+                        title         = "show_type_special_title",
+                    },
+                    {
+                        setting_id    = "show_type_captain",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_type_captain_tt",
+                        title         = "show_type_captain_title",
+                    },
+                    {
+                        setting_id    = "show_type_minion",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_type_minion_tt",
+                        title         = "show_type_minion_title",
+                    },
+                },
+            },
             --[[ {
                 setting_id = "group_appearance",
                 type = "group",
