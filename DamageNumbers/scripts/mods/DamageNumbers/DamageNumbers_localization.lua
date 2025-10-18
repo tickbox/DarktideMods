@@ -10,7 +10,7 @@ return {
     group_behavior_title = { en = "Behavior" },
     group_appearance_title = { en = "Appearance" },
     group_colors_title = { en = "Colors" },
-    group_filters_title = { en = "Filters" },
+    group_filters_title = { en = "Damage Filters" },
     group_enemy_type_filters_title = { en = "Enemy Type Filters" },
 
     toggle_enabled_title = { en = "Toggle Enabled" },
