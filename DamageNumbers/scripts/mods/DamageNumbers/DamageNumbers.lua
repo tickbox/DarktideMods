@@ -5,6 +5,87 @@ local breed = require("scripts/utilities/breed")
 local DEFAULT_LIFETIME = 1.8
 local DEFAULT_RISE_PX = 42
 
+local DEFAULT_SETTINGS = {
+    lifetime_seconds = DEFAULT_LIFETIME,
+    rise_speed_px = DEFAULT_RISE_PX,
+    vertical_lift_m = 0.2,
+    screen_offset_y_px = 24,
+    text_size_base = 26,
+    text_size_weak = 28,
+    text_size_crit = 34,
+    color_normal = { 255, 255, 230, 50 },
+    color_weak = { 255, 255, 200, 80 },
+    color_crit = { 255, 255, 80, 80 },
+    show_base_hits = true,
+    show_weak_hits = true,
+    show_crit_hits = true,
+    show_type_boss = true,
+    show_type_elite = true,
+    show_type_special = true,
+    show_type_captain = true,
+    show_type_minion = true,
+}
+
+mod._default_settings = DEFAULT_SETTINGS
+
+mod._settings_cache = mod._settings_cache or {}
+
+local function _value_or_default(setting_id, default_value)
+    if not (mod.get and setting_id) then
+        return default_value
+    end
+
+    local ok, value = pcall(mod.get, mod, setting_id)
+    if not ok or value == nil then
+        return default_value
+    end
+
+    return value
+end
+
+local function _refresh_color(cache_key, r_setting, g_setting, b_setting, defaults)
+    local cache = mod._settings_cache
+    local color = cache[cache_key]
+    if not color then
+        color = { defaults[1], defaults[2], defaults[3], defaults[4] }
+        cache[cache_key] = color
+    end
+
+    color[1] = defaults[1]
+    color[2] = _value_or_default(r_setting, defaults[2])
+    color[3] = _value_or_default(g_setting, defaults[3])
+    color[4] = _value_or_default(b_setting, defaults[4])
+end
+
+function mod.refresh_settings_cache()
+    local cache = mod._settings_cache or {}
+    mod._settings_cache = cache
+
+    cache.lifetime_seconds = _value_or_default("lifetime_seconds", DEFAULT_SETTINGS.lifetime_seconds)
+    cache.rise_speed_px = _value_or_default("rise_speed_px", DEFAULT_SETTINGS.rise_speed_px)
+    cache.vertical_lift_m = _value_or_default("vertical_lift_m", DEFAULT_SETTINGS.vertical_lift_m)
+    cache.screen_offset_y_px = _value_or_default("screen_offset_y_px", DEFAULT_SETTINGS.screen_offset_y_px)
+
+    cache.text_size_base = _value_or_default("text_size_base", DEFAULT_SETTINGS.text_size_base)
+    cache.text_size_weak = _value_or_default("text_size_weak", DEFAULT_SETTINGS.text_size_weak)
+    cache.text_size_crit = _value_or_default("text_size_crit", DEFAULT_SETTINGS.text_size_crit)
+
+    cache.show_base_hits = _value_or_default("show_base_hits", DEFAULT_SETTINGS.show_base_hits)
+    cache.show_weak_hits = _value_or_default("show_weak_hits", DEFAULT_SETTINGS.show_weak_hits)
+    cache.show_crit_hits = _value_or_default("show_crit_hits", DEFAULT_SETTINGS.show_crit_hits)
+    cache.show_type_boss = _value_or_default("show_type_boss", DEFAULT_SETTINGS.show_type_boss)
+    cache.show_type_elite = _value_or_default("show_type_elite", DEFAULT_SETTINGS.show_type_elite)
+    cache.show_type_special = _value_or_default("show_type_special", DEFAULT_SETTINGS.show_type_special)
+    cache.show_type_captain = _value_or_default("show_type_captain", DEFAULT_SETTINGS.show_type_captain)
+    cache.show_type_minion = _value_or_default("show_type_minion", DEFAULT_SETTINGS.show_type_minion)
+
+    _refresh_color("color_normal", "color_normal_r", "color_normal_g", "color_normal_b", DEFAULT_SETTINGS.color_normal)
+    _refresh_color("color_weak", "color_weak_r", "color_weak_g", "color_weak_b", DEFAULT_SETTINGS.color_weak)
+    _refresh_color("color_crit", "color_crit_r", "color_crit_g", "color_crit_b", DEFAULT_SETTINGS.color_crit)
+end
+
+mod.refresh_settings_cache()
+
 local function _world_markers_ready()
     local ui = Managers.ui
     if not ui then return false end
@@ -44,19 +125,30 @@ end
 local function _spawn_damage_marker(damage, attacked_unit, is_crit, hit_weakspot, hit_world_position, attack_direction)
     if not mod._enabled then return end
     if not attacked_unit or not Unit.alive(attacked_unit) then return end
+    local cache = mod._settings_cache or {}
+    if (not cache.lifetime_seconds) and mod.refresh_settings_cache then
+        mod.refresh_settings_cache()
+        cache = mod._settings_cache or cache
+    end
     local t = (Managers.time and Managers.time:time("main")) or os.clock()
+    local dmg_value = math.floor((tonumber(damage) or 0) + 0.5)
+    local base_text = tostring(dmg_value)
+    if is_crit then
+        base_text = base_text .. "!"
+    end
     local data = {
-        dmg = math.floor((tonumber(damage) or 0) + 0.5),
+        dmg = dmg_value,
         crit = is_crit and true or false,
         weakspot = hit_weakspot and true or false,
         start_t = t,
-        life = (mod.get and mod:get("lifetime_seconds")) or DEFAULT_LIFETIME,
-        rise_px = (mod.get and mod:get("rise_speed_px")) or DEFAULT_RISE_PX,
-        lift = (mod.get and mod:get("vertical_lift_m")) or 0.2,
-    screen_offset_y_px = (mod.get and mod:get("screen_offset_y_px")) or 24,
+        life = cache.lifetime_seconds or DEFAULT_SETTINGS.lifetime_seconds,
+        rise_px = cache.rise_speed_px or DEFAULT_SETTINGS.rise_speed_px,
+        lift = cache.vertical_lift_m or DEFAULT_SETTINGS.vertical_lift_m,
+        screen_offset_y_px = cache.screen_offset_y_px or DEFAULT_SETTINGS.screen_offset_y_px,
         hit_pos = hit_world_position,
         use_world_position = hit_world_position ~= nil,
         hit_dir = attack_direction,
+        text = base_text,
     }
     local marker_type = _pooled_marker_type()
 
@@ -103,14 +195,21 @@ mod:hook_safe(AttackReportManager, "add_attack_result", function(self, ...)
 
         local is_crit = is_critical_strike and true or false
         local is_weak = (not is_crit) and (hit_weakspot and true or false)
-        local show_base = mod:get("show_base_hits")
-        local show_weak = mod:get("show_weak_hits")
-        local show_crit = mod:get("show_crit_hits")
-        local show_boss    = mod:get("show_type_boss")
-        local show_elite   = mod:get("show_type_elite")
-        local show_special = mod:get("show_type_special")
-        local show_captain = mod:get("show_type_captain")
-        local show_minion  = mod:get("show_type_minion")
+
+        local cache = mod._settings_cache or {}
+        if (cache.show_base_hits == nil) and mod.refresh_settings_cache then
+            mod.refresh_settings_cache()
+            cache = mod._settings_cache or cache
+        end
+
+        local show_base = cache.show_base_hits ~= false
+        local show_weak = cache.show_weak_hits ~= false
+        local show_crit = cache.show_crit_hits ~= false
+        local show_boss    = cache.show_type_boss ~= false
+        local show_elite   = cache.show_type_elite ~= false
+        local show_special = cache.show_type_special ~= false
+        local show_captain = cache.show_type_captain ~= false
+        local show_minion  = cache.show_type_minion ~= false
 
         local allow_type = true
         if is_boss then
@@ -177,12 +276,21 @@ function mod.reset_settings_to_defaults()
         pcall(function() mod:set(k, v) end)
     end
     mod._enabled = true
+    if mod.refresh_settings_cache then
+        mod.refresh_settings_cache()
+    end
     mod:echo("Damage Numbers: settings reset to defaults.")
 end
 
 mod:command("dmgnums_reset", "Reset Damage Numbers settings to defaults.", function()
     mod.reset_settings_to_defaults()
 end)
+
+function mod.on_setting_changed(_)
+    if mod.refresh_settings_cache then
+        mod.refresh_settings_cache()
+    end
+end
 
 local DamageNumbersMarker = mod:io_dofile("DamageNumbers/scripts/mods/DamageNumbers/DamageNumbers_marker")
 

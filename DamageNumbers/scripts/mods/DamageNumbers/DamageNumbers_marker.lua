@@ -5,6 +5,15 @@ local UIWidget = require("scripts/managers/ui/ui_widget")
 
 local template = {}
 
+local defaults = mod._default_settings or {
+    text_size_base = 26,
+    text_size_weak = 28,
+    text_size_crit = 34,
+    color_normal = { 255, 255, 230, 50 },
+    color_weak = { 255, 255, 200, 80 },
+    color_crit = { 255, 255, 80, 80 },
+}
+
 template.name = "damage_numbers_hit"
 template.size = { 400, 200 }
 template.unit_node = "ui_marker"
@@ -84,6 +93,12 @@ template.update_function = function(parent, ui_renderer, widget, marker, _, dt, 
     local style = widget.style.text
     data = marker.data or data or {}
 
+    local cache = mod._settings_cache or {}
+    if (cache.text_size_base == nil) and mod.refresh_settings_cache then
+        mod.refresh_settings_cache()
+        cache = mod._settings_cache or cache
+    end
+
     marker._dn_elapsed = (marker._dn_elapsed or 0) + (dt or 0)
     local life = data.life or 1.0
     local age = marker._dn_elapsed
@@ -91,23 +106,25 @@ template.update_function = function(parent, ui_renderer, widget, marker, _, dt, 
 
     local is_crit = data.crit and true or false
     local is_weak = data.weakspot and true or false
-    local size_base = mod:get("text_size_base") or 26
-    local size_weak = mod:get("text_size_weak") or 28
-    local size_crit = mod:get("text_size_crit") or 34
-    local color_normal = { 255, mod:get("color_normal_r") or 255, mod:get("color_normal_g") or 230, mod:get("color_normal_b") or 50 }
-    local color_weak   = { 255, mod:get("color_weak_r") or 255,   mod:get("color_weak_g") or 200,   mod:get("color_weak_b") or 80 }
-    local color_crit   = { 255, mod:get("color_crit_r") or 255,   mod:get("color_crit_g") or 80,    mod:get("color_crit_b") or 80 }
+    local size_base = cache.text_size_base or defaults.text_size_base
+    local size_weak = cache.text_size_weak or defaults.text_size_weak
+    local size_crit = cache.text_size_crit or defaults.text_size_crit
+    local color_normal = cache.color_normal or defaults.color_normal
+    local color_weak = cache.color_weak or defaults.color_weak
+    local color_crit = cache.color_crit or defaults.color_crit
     local color = is_crit and color_crit or (is_weak and color_weak or color_normal)
     local size = is_crit and size_crit or (is_weak and size_weak or size_base)
 
     style.font_size = size
-    style.text_color = color
-
-    local text = tostring(data.dmg or "")
-    if is_crit then
-        text = text .. "!"
+    local text_color = style.text_color
+    if text_color then
+        text_color[1] = color[1] or 255
+        text_color[2] = color[2] or 255
+        text_color[3] = color[3] or 255
+        text_color[4] = color[4] or 255
     end
-    content.text = text
+
+    content.text = data.text or tostring(data.dmg or "")
 
     local rise_px = data.rise_px or 36
     local base_y = -(data.screen_offset_y_px or 24)
@@ -115,11 +132,14 @@ template.update_function = function(parent, ui_renderer, widget, marker, _, dt, 
     style.offset[1] = 0
     style.offset[2] = yoff
 
-    local a = 255
+    local base_alpha = (color and color[1]) or 255
+    local a = base_alpha
     if progress > 0.75 then
-        a = math.floor(255 * (1 - (progress - 0.75) / 0.25))
+        a = math.floor(base_alpha * (1 - (progress - 0.75) / 0.25))
     end
-    style.text_color[1] = a
+    if text_color then
+        text_color[1] = a
+    end
 
     widget.alpha_multiplier = 1
     widget.visible = true
