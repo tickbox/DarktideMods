@@ -136,6 +136,48 @@ return {
                     },
                 },
             },
+            {
+                setting_id = "group_attack_type_filters",
+                type = "group",
+                title = "group_attack_type_filters_title",
+                sub_widgets = {
+                    {
+                        setting_id    = "show_attack_type_melee",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_attack_type_melee_tt",
+                        title         = "show_attack_type_melee_title",
+                    },
+                    {
+                        setting_id    = "show_attack_type_ranged",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_attack_type_ranged_tt",
+                        title         = "show_attack_type_ranged_title",
+                    },
+                    {
+                        setting_id    = "show_attack_type_explosion",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_attack_type_explosion_tt",
+                        title         = "show_attack_type_explosion_title",
+                    },
+                    {
+                        setting_id    = "show_attack_type_buff",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_attack_type_buff_tt",
+                        title         = "show_attack_type_buff_title",
+                    },
+                    {
+                        setting_id    = "show_attack_type_companion_dog",
+                        type          = "checkbox",
+                        default_value = true,
+                        tooltip       = "show_attack_type_companion_dog_tt",
+                        title         = "show_attack_type_companion_dog_title",
+                    },
+                },
+            },
             --[[ {
                 setting_id = "group_appearance",
                 type = "group",

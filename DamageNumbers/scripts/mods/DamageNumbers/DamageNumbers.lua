@@ -24,6 +24,11 @@ local DEFAULT_SETTINGS = {
     show_type_special = true,
     show_type_captain = true,
     show_type_minion = true,
+    show_attack_type_melee = true,
+    show_attack_type_ranged = true,
+    show_attack_type_explosion = true,
+    show_attack_type_buff = true,
+    show_attack_type_companion_dog = true,
 }
 
 mod._default_settings = DEFAULT_SETTINGS
@@ -78,6 +83,11 @@ function mod.refresh_settings_cache()
     cache.show_type_special = _value_or_default("show_type_special", DEFAULT_SETTINGS.show_type_special)
     cache.show_type_captain = _value_or_default("show_type_captain", DEFAULT_SETTINGS.show_type_captain)
     cache.show_type_minion = _value_or_default("show_type_minion", DEFAULT_SETTINGS.show_type_minion)
+    cache.show_attack_type_melee = _value_or_default("show_attack_type_melee", DEFAULT_SETTINGS.show_attack_type_melee)
+    cache.show_attack_type_ranged = _value_or_default("show_attack_type_ranged", DEFAULT_SETTINGS.show_attack_type_ranged)
+    cache.show_attack_type_explosion = _value_or_default("show_attack_type_explosion", DEFAULT_SETTINGS.show_attack_type_explosion)
+    cache.show_attack_type_buff = _value_or_default("show_attack_type_buff", DEFAULT_SETTINGS.show_attack_type_buff)
+    cache.show_attack_type_companion_dog = _value_or_default("show_attack_type_companion_dog", DEFAULT_SETTINGS.show_attack_type_companion_dog)
 
     _refresh_color("color_normal", "color_normal_r", "color_normal_g", "color_normal_b", DEFAULT_SETTINGS.color_normal)
     _refresh_color("color_weak", "color_weak_r", "color_weak_g", "color_weak_b", DEFAULT_SETTINGS.color_weak)
@@ -210,6 +220,11 @@ mod:hook_safe(AttackReportManager, "add_attack_result", function(self, ...)
         local show_special = cache.show_type_special ~= false
         local show_captain = cache.show_type_captain ~= false
         local show_minion  = cache.show_type_minion ~= false
+        local show_attack_melee = cache.show_attack_type_melee ~= false
+        local show_attack_ranged = cache.show_attack_type_ranged ~= false
+        local show_attack_explosion = cache.show_attack_type_explosion ~= false
+        local show_attack_buff = cache.show_attack_type_buff ~= false
+        local show_attack_companion_dog = cache.show_attack_type_companion_dog ~= false
 
         local allow_type = true
         if is_boss then
@@ -225,6 +240,23 @@ mod:hook_safe(AttackReportManager, "add_attack_result", function(self, ...)
         end
 
         if not allow_type then
+            return
+        end
+
+        local allow_attack_type = true
+        if attack_type == "melee" then
+            allow_attack_type = show_attack_melee
+        elseif attack_type == "ranged" then
+            allow_attack_type = show_attack_ranged
+        elseif attack_type == "explosion" then
+            allow_attack_type = show_attack_explosion
+        elseif attack_type == "buff" then
+            allow_attack_type = show_attack_buff
+        elseif attack_type == "companion_dog" then
+            allow_attack_type = show_attack_companion_dog
+        end
+
+        if not allow_attack_type then
             return
         end
 
@@ -271,6 +303,11 @@ function mod.reset_settings_to_defaults()
         show_type_special = true,
         show_type_captain = true,
         show_type_minion = true,
+        show_attack_type_melee = true,
+        show_attack_type_ranged = true,
+        show_attack_type_explosion = true,
+        show_attack_type_buff = true,
+        show_attack_type_companion_dog = true,
     }
     for k, v in pairs(defaults) do
         pcall(function() mod:set(k, v) end)
