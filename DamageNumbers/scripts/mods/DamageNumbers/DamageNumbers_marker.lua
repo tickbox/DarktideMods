@@ -142,12 +142,18 @@ template.update_function = function(parent, ui_renderer, widget, marker, _, dt, 
     end
 
     widget.alpha_multiplier = 1
-    widget.visible = true
+    widget.visible = progress < 1
     marker.use_world_position = true
 
     if not marker._dn_life_applied then
         marker.life_time = life
         marker._dn_life_applied = true
+    end
+
+    if age >= life then
+        widget.visible = false
+        --marker.remove = true
+        return true
     end
 
     return false
