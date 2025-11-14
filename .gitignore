@@ -12,5 +12,7 @@
 !mike_block/**
 !DamageNumbers
 !DamageNumbers/**
+!custom_hud_patch
+!custom_hud_patch/**
 */*.*
 !/*/*.mod
