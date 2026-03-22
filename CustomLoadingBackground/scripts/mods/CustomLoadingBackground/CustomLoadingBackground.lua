@@ -1,5 +1,9 @@
 local mod = get_mod("CustomLoadingBackground")
 
+local PromiseContainer = require("scripts/utilities/ui/promise_container")
+
+local promise_container = PromiseContainer:new()
+
 local localServer = get_mod("DarktideLocalServer")
 
 local backgroundImageTableLocal = mod:persistent_table("backgroundImageTableLocal", {})
@@ -86,10 +90,10 @@ local loadLocalImages = function ()
 				keys = _prioritize_list(keys)
 				for _, k in ipairs(keys) do
 					local v = backgroundImageFiles[k]
-					if table.size(v) == 4 and not backgroundImageTableLocal[k] then
+					if v.texture and not backgroundImageTableLocal[k] then
 						backgroundImageTableLocal[k] = v
 					else
-						if v and v.url then Managers.url_loader:unload_texture(v.url) end
+						if v and v.url and v.texture then Managers.url_loader:unload_texture(v.url) end
 					end
 				end
 			end)
@@ -131,17 +135,18 @@ local loadWebImages = function ()
 			if imageEnabled[url] == false and not mod._manager_full_load then
 				backgroundImageTableWeb[url] = nil
 			else
-				Managers.url_loader:load_texture(url)
+				--Managers.url_loader:load_texture(url)
+				promise_container:cancel_on_destroy(Managers.url_loader:load_texture(url):next())
 					:next(function(data)
-						if table.size(data) == 4 and not backgroundImageTableWeb[url] and (imageEnabled[url] ~= false or mod._manager_full_load) then
+						if data and data.texture and not backgroundImageTableWeb[url] and (imageEnabled[url] ~= false or mod._manager_full_load) then
 							backgroundImageTableWeb[url] = data
 						else
 							Managers.url_loader:unload_texture(url)
 						end
 					end)
-					:catch(function(error)
+					--[[ :catch(function(error)
 						mod:dtf(error, "Error loading web image", 99)
-					end)
+					end) ]]
 			end
 		end
 	end
@@ -231,14 +236,15 @@ local loadCuratedImages = function()
 			and backgroundImageTableCuratedUrls[url]  -- guard instead of goto
 		then
 			local current_loading_ref = loading
-			Managers.url_loader:load_texture(url)
+			--Managers.url_loader:load_texture(url)
+			promise_container:cancel_on_destroy(Managers.url_loader:load_texture(url):next())
 				:next(function(data)
 					local meta_now = backgroundImageTableCuratedUrls[url]
 					if not meta_now or meta_now ~= current_loading_ref then
 						if data and data.url then pcall(function() Managers.url_loader:unload_texture(data.url) end) end
 						return
 					end
-					if table.size(data) == 4
+					if data and data.texture
 						and not backgroundImageTableCurated[url]
 						and (imageEnabled[url] ~= false or mod._manager_full_load)
 					then
@@ -248,9 +254,9 @@ local loadCuratedImages = function()
 						Managers.url_loader:unload_texture(url)
 					end
 				end)
-				:catch(function(error)
+				--[[ :catch(function(error)
 					mod:dump(error, "Error loading curated image", 99)
-				end)
+				end) ]]
 		end
 	end
 	
@@ -1637,7 +1643,8 @@ _load_url_into_queue = function(url)
 	if mod._queue_loading[url] then return end
 	mod._queue_loading[url] = true
 	local load_gen = mod._queue_gen
-	Managers.url_loader:load_texture(url)
+	--Managers.url_loader:load_texture(url)
+	promise_container:cancel_on_destroy(Managers.url_loader:load_texture(url):next())
 		:next(function(data)
 			mod._queue_loading[url] = nil
 			if load_gen ~= mod._queue_gen then
@@ -1648,7 +1655,7 @@ _load_url_into_queue = function(url)
 				if data and data.url then pcall(function() Managers.url_loader:unload_texture(data.url) end) end
 				return
 			end
-			if table.size(data) == 4 then
+			if data and data.texture then
 				for i=1,#mod._image_queue do if mod._image_queue[i].key == url then return end end
 				mod._image_queue[#mod._image_queue+1] = { key = url, data = data }
 				backgroundImageTableAll[url] = data
@@ -1665,10 +1672,10 @@ _load_url_into_queue = function(url)
 				if data and data.url then pcall(function() Managers.url_loader:unload_texture(data.url) end) end
 			end
 		end)
-		:catch(function(err)
+		--[[ :catch(function(err)
 			mod._queue_loading[url] = nil
 			mod:dump(err, "Queue load error", 1)
-		end)
+		end) ]]
 end
 
 local function _queue_select(idx)
@@ -1708,11 +1715,12 @@ _advance_queue = function()
 	local orig_loading = mod._queue_loading[url]
 	if not orig_loading then
 		mod._queue_loading[url] = true
-		Managers.url_loader:load_texture(url)
+		--Managers.url_loader:load_texture(url)
+		promise_container:cancel_on_destroy(Managers.url_loader:load_texture(url):next())
 			:next(function(data)
 				mod._queue_loading[url] = nil
 				if imageEnabled[url] == false then if data and data.url then pcall(function() Managers.url_loader:unload_texture(data.url) end) end return end
-				if table.size(data) == 4 then
+				if data and data.texture then
 					-- Prevent duplicates
 					for i=1,#q do if q[i].key == url then return end end
 					q[#q+1] = { key = url, data = data }
@@ -1729,11 +1737,11 @@ _advance_queue = function()
 					if data and data.url then pcall(function() Managers.url_loader:unload_texture(data.url) end) end
 				end
 			end)
-			:catch(function(err)
+			--[[ :catch(function(err)
 				mod._queue_loading[url] = nil
 				mod._queue_pending_next = false
 				mod:dump(err, "Queue load error (advance)", 1)
-			end)
+			end) ]]
 	end
 end
 
@@ -1868,14 +1876,15 @@ function mod._enter_full_load_for_manager()
 			if backgroundImageTableWeb[url] then return end
 		end
 		local gen = mod._manager_full_gen
-		Managers.url_loader:load_texture(url)
+		--Managers.url_loader:load_texture(url)
+		promise_container:cancel_on_destroy(Managers.url_loader:load_texture(url):next())
 			:next(function(data)
 				if gen ~= mod._manager_full_gen or not mod._manager_full_load then
 					if data and data.url then pcall(function() Managers.url_loader:unload_texture(data.url) end) end
 					mod._manager_inflight = math.max(0, (mod._manager_inflight or 1) - 1)
 					return
 				end
-				if table.size(data) == 4 then
+				if data and data.texture then
 					if is_curated then
 						backgroundImageTableCurated[url] = data
 						local meta = backgroundImageTableCuratedUrls[url]; if meta then meta.failed = false end
@@ -1890,11 +1899,11 @@ function mod._enter_full_load_for_manager()
 				end
 				mod._manager_inflight = math.max(0, (mod._manager_inflight or 1) - 1)
 			end)
-			:catch(function(err)
+			--[[ :catch(function(err)
 				mod:dump(err, "Force load error", 1)
 				if is_curated then local meta = backgroundImageTableCuratedUrls[url]; if meta then meta.failed = true end end
 				mod._manager_inflight = math.max(0, (mod._manager_inflight or 1) - 1)
-			end)
+			end) ]]
 	end
 
 	local web_rows = _enabled_url_rows()
