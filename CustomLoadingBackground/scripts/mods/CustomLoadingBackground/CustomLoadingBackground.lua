@@ -90,10 +90,10 @@ local loadLocalImages = function ()
 				keys = _prioritize_list(keys)
 				for _, k in ipairs(keys) do
 					local v = backgroundImageFiles[k]
-					if table.size(v) == 4 and not backgroundImageTableLocal[k] then
+					if v.texture and not backgroundImageTableLocal[k] then
 						backgroundImageTableLocal[k] = v
 					else
-						if v and v.url then Managers.url_loader:unload_texture(v.url) end
+						if v and v.url and v.texture then Managers.url_loader:unload_texture(v.url) end
 					end
 				end
 			end)
